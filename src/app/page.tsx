@@ -16,9 +16,21 @@ export default function Home() {
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             Speed Meeting
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            
-          </p>
+            <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 text-justify">
+            <b>Contexte</b>: Un repas d'affaires organisé par la FFI (<b>F</b>orces <b>F</b>rançaises de l'<b>I</b>ndustrie) réunit des professionnels de divers secteurs pour échanger et établir des contacts en partageant leur activité professionnelle et leur parcours.
+            <br />
+            <br />
+            <b>Objectif</b>: Créer des relations entre les invités afin de parler de parcours professionnel, d'affaires et de projets communs.
+            <br />
+            <br />
+            <b>Rôle de l'IA</b>: Gérer la disposition des participants à chaque table. Les invités sont assignés à des tables dans un ordre aléatoire et changent de table après chaque session du speed meeting.
+            <br />
+            <br />
+            <b>Fonctionnement</b>: Chaque invité scanne un QR code pour accéder à son profil. L'IA utilise le plan de la salle et les paramétrages de la session (nombre de participants, nombre de tables, durée de la session) pour organiser les rencontres.
+            <br />
+            <br />
+            <b className="text-red-500">Attention</b>: Les invités ne doivent pas rencontrer la même personne une seconde fois. Ainsi, il n'est pas obligatoire que toutes les personnes se rencontrent.
+            </p>
         </div>
       </main>
     </div>

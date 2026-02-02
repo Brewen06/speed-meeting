@@ -6,18 +6,11 @@ export default function Home() {
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <div className="flex flex-col items-center gap-6 sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Paramètrages de la session
+            QR Code
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Veuillez mettre ici les paramètrages de la session afin que l'IA détermine le nombre de personnes 
-            à placer sur une table en un tour.
+            Veuillez scanner le QR code pour accéder à votre profil.
           </p>
-          Combien y a-til de participants ?
-            <input type="number" className="border border-zinc-300 rounded-md px-3 py-2 mt-2 w-32"/>
-          Combien y a-til de tables ?
-            <input type="number" className="border border-zinc-300 rounded-md px-3 py-2 mt-2 w-32"/>
-          Quelle est la durée de la session du speed meeting (en minutes) ?
-            <input type="number" className="border border-zinc-300 rounded-md px-3 py-2 mt-2 w-32"/>
         </div>
       </main>
     </div>
