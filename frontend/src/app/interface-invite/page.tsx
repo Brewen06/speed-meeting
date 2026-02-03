@@ -1,3 +1,4 @@
+import { ignoreListAnonymousStackFramesIfSandwiched } from "next/dist/next-devtools/server/shared";
 import Image from "next/image";
 
 export default function Home() {
@@ -8,9 +9,11 @@ export default function Home() {
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             Page d'invité
           </h1>
+          
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            
+            Veuillez patientez pendant que l'organisateur configure la session...
           </p>
+          
         </div>
       </main>
     </div>
