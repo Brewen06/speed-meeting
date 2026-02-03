@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -14,9 +15,6 @@ export default function Home() {
               <div className="flex flex-col gap-3 mt-6">
               <a href="/interface-admin/parametrage" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                 Accéder aux paramétrages de la session
-              </a>
-              <a href="/interface-admin/plan-salle" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                Accéder au plan de la salle
               </a>
               <a href="/" className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
                 Retour à l'accueil
