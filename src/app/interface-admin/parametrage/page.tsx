@@ -12,12 +12,16 @@ export default function Home() {
             Veuillez mettre ici les paramètrages de la session afin que l'IA détermine le nombre de personnes 
             à placer sur une table en un tour.
           </p>
+          <form className="flex flex-col gap-4 mt-4 w-full max-w-md">
           Combien y a-til de participants ?
             <input type="number" className="border border-zinc-300 rounded-md px-3 py-2 mt-2 w-32"/>
           Combien y a-til de tables ?
             <input type="number" className="border border-zinc-300 rounded-md px-3 py-2 mt-2 w-32"/>
           Quelle est la durée de la session du speed meeting (en minutes) ?
             <input type="number" className="border border-zinc-300 rounded-md px-3 py-2 mt-2 w-32"/>
+             
+            <input type="submit" value="Enregistrer les paramètrages" className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-blue-700" formAction="/interface-admin/plan-salle" aria-label="Veuillez remplir tous les champs"/>
+          </form>
         </div>
       </main>
     </div>

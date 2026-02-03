@@ -9,9 +9,12 @@ export default function Home() {
             Page d'administration
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            <h1>Bienvenue sur votre interface d'administration.</h1>
+            Bienvenue sur votre interface d'administration.
             <a href="/interface-admin/parametrage" className="text-blue-600 underline ml-4">
               Accéder aux paramétrages de la session
+            </a>
+            <a href="/interface-admin/plan-salle" className="text-blue-600 underline ml-4">
+              Accéder au plan de la salle
             </a>
           </p>
         </div>

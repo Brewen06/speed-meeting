@@ -11,6 +11,7 @@ export default function Home() {
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Veuillez mettre ici le plan de la salle que l'IA devra analyser.
           </p>
+          <input type="file" accept="image/*" className="mt-4" />
         </div>
       </main>
     </div>
