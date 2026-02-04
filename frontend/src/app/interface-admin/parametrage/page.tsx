@@ -18,19 +18,10 @@ export default function Home() {
           <form className="space-y-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex flex-col">
-                <label
-                  htmlFor="participantCount"
-                  className="text-sm font-semibold text-black dark:text-white mb-2"
-                >
+                <label htmlFor="participantCount" className="text-sm font-semibold text-black dark:text-white mb-2">
                   Nombre de participants
                 </label>
-                <input
-                  id="participantCount"
-                  type="number"
-                  className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  required
-                  placeholder="Ex: 20"
-                />
+                <input id="participantCount" type="number" className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required placeholder="Ex: 20" />
               </div>
 
               <div className="flex flex-col">

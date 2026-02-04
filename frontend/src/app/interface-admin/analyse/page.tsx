@@ -11,7 +11,7 @@ export default function Home() {
 
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Veuillez patientez pendant que l'IA analyse le plan de la salle et
-            les paramétrages de la session ...
+            les paramétrages de la session ... <br></br>
             Elle détermine le nombre d'invités présents sur une seule table pendant quelques minutes.
             <div className="mt-8 flex flex-col items-center gap-4">
               <div className="flex gap-2">

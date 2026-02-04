@@ -9,7 +9,10 @@ export default function Home() {
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             Page d'invité
           </h1>
-          </div>
+          <a href="/" className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
+            Retour à l'accueil
+          </a>
+        </div>
       </main>
     </div>
   );
