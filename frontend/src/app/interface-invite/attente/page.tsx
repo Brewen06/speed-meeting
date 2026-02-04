@@ -20,6 +20,7 @@ export default function Home() {
               <div className="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
               <div className="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
             </div>
+            {}
             <p className="text-sm text-zinc-500 dark:text-zinc-400">Chargement en cours...</p>
           </div>
         </div>
