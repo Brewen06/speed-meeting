@@ -2,6 +2,10 @@
 __pycache__/
 venv/
 .env
+backend/Include/
+backend/Lib/
+backend/Scripts/
+backend/pyvenv.cfg
 
 # Node
 node_modules/

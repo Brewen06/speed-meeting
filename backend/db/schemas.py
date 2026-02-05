@@ -1,0 +1,72 @@
+from pydantic import BaseModel, ConfigDict
+from typing import List, Optional
+from datetime import datetime
+
+# SCHEMA DE BASE
+
+class EventBase(BaseModel):
+    nom: str
+    date: datetime
+    temps_total: int
+    statut: str = "planifié"  # planifié, en cours, terminé
+
+class ParticipantBase(BaseModel):
+    id: int
+    nom: str
+    entreprise: Optional[str] = None
+
+class ParticipantCreate(ParticipantBase):
+    pass
+
+class TableBase(BaseModel):
+    numero: int
+    x: float
+    y: float
+    capacite: int
+
+class RoundBase(BaseModel): 
+    numero: int
+    heure_debut: datetime
+    duree_minutes: int  # en minutes
+
+class AffectationBase(BaseModel):
+    id_participant: int
+    id_table: int
+    id_round: int
+    
+# SCHEMAS POUR LA FRONTEND
+
+class Event(EventBase):
+    id: int
+    # On peut inclure la liste des participants inscrits à cet événement
+    participants: List[Participant] = []
+    model_config = ConfigDict(from_attributes=True)
+
+class Participant(ParticipantBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True) # Nouveau format Pydantic v2
+
+class Table(TableBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class Round(RoundBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class Affectation(AffectationBase):
+    id: int
+    # Ces champs permettent au Frontend de recevoir l'objet complet au lieu de simples ID
+    participant: Optional[Participant] = None
+    table: Optional[Table] = None
+    round_info: Optional[Round] = None # Renommé pour éviter conflit avec le type Round
+    
+    model_config = ConfigDict(from_attributes=True)
+
+# --- SCHEMA DE RÉPONSE POUR L'IA ---
+# Ce que l'IA renvoie après avoir calculé les rotations
+class SpeedMeetingResult(BaseModel):
+    event_id: int
+    total_rounds: int
+    affectations: List[AffectationBase]
+    message: str
