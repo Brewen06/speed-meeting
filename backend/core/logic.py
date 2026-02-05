@@ -1,56 +1,71 @@
 import random
 
-def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel):
-    # 1. Préparation des participants (on crée des IDs ou on simule des noms)
-    participants = [f"Participant {i+1}" for i in range(participantCountLabel)]
+def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel, time_per_round):
+    # 1. Gestion des participants réels + AJOUT DES FANTÔMES
+    real_participants = [f"Participant {i+1}" for i in range(participantCountLabel)]
     
-    # 2. Estimation du nombre de rounds (ex: 10 minutes par round)
-    time_per_round = 10
-    num_rounds = max(1, sessionDurationLabel // time_per_round)
+    # On calcule combien de places il faut au total pour remplir les tables
+    total_slots = -(-participantCountLabel // tableCountLabel) * tableCountLabel
+    num_ghosts = total_slots - participantCountLabel
     
-    # 3. Calcul de la capacité par table
-    capacity = (participantCountLabel // tableCountLabel)
-    if participantCountLabel % tableCountLabel != 0:
-        capacity += 1
+    # On ajoute des participants "PAUSE" pour équilibrer les tables
+    ghosts = [f"PAUSE {i+1}" for i in range(num_ghosts)]
+    participants = real_participants + ghosts
 
-    # 4. Historique pour éviter les doublons
-    # Clé: participant, Valeur: set des personnes déjà rencontrées
+    if tableCountLabel <= 0: 
+        return {"error": "Nombre de tables doit être > 0"}
+    
+    capacity = len(participants) // tableCountLabel
+
+    # 2. Calcul des limites (inchangé mais basé sur participants totaux)
+    new_meetings_per_round = capacity - 1
+    max_theoretical_rounds = (len(participants) - 1) // new_meetings_per_round if new_meetings_per_round > 0 else 1
+    
+    if time_per_round > 0:
+        effective_time_per_round = time_per_round
+        max_rounds_by_time = sessionDurationLabel // effective_time_per_round
+    else:
+        max_rounds_by_time = min(max_theoretical_rounds, max(1, sessionDurationLabel // 5))
+        effective_time_per_round = sessionDurationLabel // max_rounds_by_time if max_rounds_by_time > 0 else sessionDurationLabel
+    
+    num_rounds = max(1, min(max_rounds_by_time, max_theoretical_rounds))
+
     history = {p: set() for p in participants}
     all_rounds = []
-
+    
     for r in range(num_rounds):
         tables = [[] for _ in range(tableCountLabel)]
         waiting_list = list(participants)
-        random.shuffle(waiting_list) # Aléatoire !
-
+        random.shuffle(waiting_list)
+        
         for p in waiting_list:
             placed = False
-            # On cherche une table avec le moins de conflits
-            # On mélange l'ordre des tables pour plus d'aléatoire
             table_indices = list(range(tableCountLabel))
             random.shuffle(table_indices)
-
+            
+            # Tentative de placement sans doublon
             for t_idx in table_indices:
                 if len(tables[t_idx]) < capacity:
-                    # Vérification : est-ce que p a déjà vu quelqu'un à cette table ?
                     if not any(other in history[p] for other in tables[t_idx]):
                         tables[t_idx].append(p)
                         placed = True
                         break
             
-            # Si vraiment bloqué, on le met à la table la moins remplie
+            # Placement forcé si nécessaire
             if not placed:
-                min_table = min(tables, key=len)
-                if len(min_table) < capacity:
-                    min_table.append(p)
-
-        # Mise à jour de l'historique après le round
+                for t_idx in table_indices:
+                    if len(tables[t_idx]) < capacity:
+                        tables[t_idx].append(p)
+                        break
+        
+        # Mise à jour de l'historique
         for table in tables:
             for p1 in table:
+                if "PAUSE" in p1: continue # Les fantômes ne comptent pas dans l'historique
                 for p2 in table:
-                    if p1 != p2:
+                    if p1 != p2 and "PAUSE" not in p2:
                         history[p1].add(p2)
-
+        
         all_rounds.append({
             "round": r + 1,
             "tables": tables
@@ -58,8 +73,10 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
 
     return {
         "metadata": {
-            "participants": participantCountLabel,
+            "real_participants": participantCountLabel,
+            "ghosts_added": num_ghosts,
             "tables": tableCountLabel,
+            "time_per_round": effective_time_per_round,
             "rounds_generated": len(all_rounds)
         },
         "rounds": all_rounds
