@@ -32,6 +32,7 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
     num_rounds = max(1, min(max_rounds_by_time, max_theoretical_rounds))
 
     history = {p: set() for p in participants}
+
     all_rounds = []
     
     for r in range(num_rounds):
@@ -39,6 +40,8 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
         waiting_list = list(participants)
         random.shuffle(waiting_list)
         
+        round_data = {"round": r + 1, "tables": tables}
+
         for p in waiting_list:
             placed = False
             table_indices = list(range(tableCountLabel))
@@ -67,10 +70,14 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
                     if p1 != p2 and "PAUSE" not in p2:
                         history[p1].add(p2)
         
-        all_rounds.append({
-            "round": r + 1,
-            "tables": tables
-        })
+        for t_idx, participants_at_table in enumerate(tables):
+            round_data["tables"].append({
+                "table_id": t_idx + 1,  # Voilà ton numéro de table !
+                "table_name": f"Table {t_idx + 1}",
+                "members": participants_at_table
+            })
+
+        all_rounds.append(round_data)
 
     return {
         "metadata": {

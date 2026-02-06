@@ -1,14 +1,35 @@
-from random import shuffle
-from fastapi import FastAPI
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from db.database import get_db
+from db.models import Participant
+from pydantic import BaseModel
+from auth import get_current_admin
 
-import random
+router = APIRouter()
 
-def ordre_table_aleatoire(participantCountLabel: int, tableCountLabel: int):
+# Schema pour l'ajout d'un participant
+class ParticipantCreate(BaseModel):
+    name: str
+
+@router.get("/participants")
+def get_all_participants(db: Session = Depends(get_db)):
+    
+    return db.query(Participant).all()
+
+@router.post("/participants")
+def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db)):
    
-    participants = list(range(participantCountLabel))
-    random.shuffle(participants)
-    distribution = {}
-    table_size = participantCountLabel // tableCountLabel
-    for table_number in range(tableCountLabel):
-        distribution[table_number] = participants[table_number * table_size:(table_number + 1) * table_size]
-    return distribution
+    new_p = Participant(name=participant.name)
+    db.add(new_p)
+    db.commit()
+    db.refresh(new_p)
+    return new_p
+
+@router.delete("/participants/clear")
+def clear_participants(
+    db: Session = Depends(get_db), 
+    admin: str = Depends(get_current_admin) # <--- La route est maintenant protégée !
+):
+    db.query(Participant).delete()
+    db.commit()
+    return {"message": "Nettoyage effectué par l'admin"}
