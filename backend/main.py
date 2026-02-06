@@ -29,10 +29,8 @@ def root():
 def core_route(participantCountLabel: int, tableCountLabel: int, sessionDurationLabel: int, time_per_round: int = 10):
     return generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel, time_per_round)
 
-# Test rapide
 @app.get("/core-test")
-def core_route(participants: int, tables: int, duration: int, time_per_round: int = 10):
-    
+def core_test_route(participants: int, tables: int, duration: int, time_per_round: int = 10):
     return generate_rounds(participants, tables, duration, time_per_round)
 
 # Routes utilitaires
@@ -40,3 +38,4 @@ def core_route(participants: int, tables: int, duration: int, time_per_round: in
 def db_status(db: Session = Depends(get_db)):
     count = db.query(Participant).count()
     return {"database": "connected", "participants_in_db": count}
+

@@ -39,9 +39,8 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
         tables = [[] for _ in range(tableCountLabel)]
         waiting_list = list(participants)
         random.shuffle(waiting_list)
-        
-        round_data = {"round": r + 1, "tables": tables}
 
+        # Placement des participants dans les tables
         for p in waiting_list:
             placed = False
             table_indices = list(range(tableCountLabel))
@@ -60,6 +59,7 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
                 for t_idx in table_indices:
                     if len(tables[t_idx]) < capacity:
                         tables[t_idx].append(p)
+                        placed = True
                         break
         
         # Mise à jour de l'historique
@@ -70,12 +70,19 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
                     if p1 != p2 and "PAUSE" not in p2:
                         history[p1].add(p2)
         
+        # Construction du round_data avec la structure correcte
+        tables_data = []
         for t_idx, participants_at_table in enumerate(tables):
-            round_data["tables"].append({
-                "table_id": t_idx + 1,  # Voilà ton numéro de table !
+            tables_data.append({
+                "table_id": t_idx + 1,
                 "table_name": f"Table {t_idx + 1}",
                 "members": participants_at_table
             })
+        
+        round_data = {
+            "round": r + 1,
+            "tables": tables_data
+        }
 
         all_rounds.append(round_data)
 
