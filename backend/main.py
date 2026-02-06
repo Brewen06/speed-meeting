@@ -1,26 +1,16 @@
 import datetime
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from db.database import engine, Base, get_db
+from db.models import Participant 
+from api.generate import router as generate_router
 from core.logic import generate_rounds
-from pydantic import BaseModel
 
-app = FastAPI()
+Base.metadata.create_all(bind=engine)
 
-@app.get("/")
-def root():
-    return {"message": "FastAPI fonctionne"}
+app = FastAPI(title="Speed Meeting AI API")
 
-
-@app.get("/core")
-def core_route(participantCountLabel: int, tableCountLabel: int, sessionDurationLabel: datetime.timedelta):
-    return generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel)
-
-@app.post("/core")
-def core_post_route(data: dict):
-    participantCountLabel = data.get("participantCountLabel", 0)
-    tableCountLabel = data.get("tableCountLabel", 0)
-    sessionDurationLabel = data.get("sessionDurationLabel", datetime.timedelta(0))
-    return generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,14 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/db/init")
-def db_init():
-    return {"message": "Database initialized"}
+app.include_router(generate_router, prefix="/api", tags=["api"])
 
-@app.get("/utils")
-def utils_route():
-    return {"message": "Utils route"}
+@app.get("/")
+def root():
+    return {"message": "Serveur Speed Meeting opérationnel", "status": "online"}
 
-@app.get("/api")
-def api_route():
-    return {"message": "API route"}
+@app.get("/core")
+def core_route(participantCountLabel: int, tableCountLabel: int, sessionDurationLabel: int, time_per_round: int = 10):
+    return generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel, time_per_round)
+
+# Test rapide
+@app.get("/core-test")
+def core_route(participants: int, tables: int, duration: int, time_per_round: int = 10):
+    
+    return generate_rounds(participants, tables, duration, time_per_round)
+
+# Routes utilitaires
+@app.get("/db/status")
+def db_status(db: Session = Depends(get_db)):
+    count = db.query(Participant).count()
+    return {"database": "connected", "participants_in_db": count}

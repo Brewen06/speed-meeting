@@ -1,5 +1,4 @@
 from random import shuffle
-from main import app
 from fastapi import FastAPI
 
 import random

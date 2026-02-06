@@ -2,21 +2,23 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
-# SCHEMA DE BASE
-
-class EventBase(BaseModel):
-    nom: str
-    date: datetime
-    temps_total: int
-    statut: str = "planifié"  # planifié, en cours, terminé
+# SCHEMAS DE BASE
 
 class ParticipantBase(BaseModel):
     id: int
     nom: str
+    prenom: str
+    mail: Optional[str] = None
     entreprise: Optional[str] = None
 
 class ParticipantCreate(ParticipantBase):
     pass
+
+class MeetingSessionBase(BaseModel):
+    nom: str
+    date: datetime
+    temps_total: int
+    statut: str = "planifié"  # planifié, en cours, terminé
 
 class TableBase(BaseModel):
     numero: int
@@ -36,15 +38,15 @@ class AffectationBase(BaseModel):
     
 # SCHEMAS POUR LA FRONTEND
 
-class Event(EventBase):
+class Participant(ParticipantBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True) # Nouveau format Pydantic v2
+
+class MeetingSession(MeetingSessionBase):
     id: int
     # On peut inclure la liste des participants inscrits à cet événement
     participants: List[Participant] = []
     model_config = ConfigDict(from_attributes=True)
-
-class Participant(ParticipantBase):
-    id: int
-    model_config = ConfigDict(from_attributes=True) # Nouveau format Pydantic v2
 
 class Table(TableBase):
     id: int
@@ -66,7 +68,7 @@ class Affectation(AffectationBase):
 # --- SCHEMA DE RÉPONSE POUR L'IA ---
 # Ce que l'IA renvoie après avoir calculé les rotations
 class SpeedMeetingResult(BaseModel):
-    event_id: int
+    meetingsession_id: int
     total_rounds: int
-    affectations: List[AffectationBase]
+    affectations: List[Affectation]
     message: str

@@ -1,4 +1,3 @@
-from main import app
 
 def authentificate_orga(username: str, password: str) -> bool:
     # Pour que l'organisateur puisse se connecter

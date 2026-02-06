@@ -1,25 +1,26 @@
 import random
 
 def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel, time_per_round):
-    # 1. Gestion des participants réels + AJOUT DES FANTÔMES
-    real_participants = [f"Participant {i+1}" for i in range(participantCountLabel)]
+    # Gestionnaire des participants et des places vides
+    participants_reels = [f"Participant {i+1}" for i in range(participantCountLabel)]
     
-    # On calcule combien de places il faut au total pour remplir les tables
+    # Calcul de places il faut au total pour remplir les tables
     total_slots = -(-participantCountLabel // tableCountLabel) * tableCountLabel
-    num_ghosts = total_slots - participantCountLabel
+    num_spectres = total_slots - participantCountLabel
     
-    # On ajoute des participants "PAUSE" pour équilibrer les tables
-    ghosts = [f"PAUSE {i+1}" for i in range(num_ghosts)]
-    participants = real_participants + ghosts
+    # Ajout des participants "PAUSE" pour équilibrer les tables
+    spectres = [f"PAUSE {i+1}" for i in range(num_spectres)]
+    participants = participants_reels + spectres
 
     if tableCountLabel <= 0: 
         return {"error": "Nombre de tables doit être > 0"}
     
     capacity = len(participants) // tableCountLabel
 
-    # 2. Calcul des limites (inchangé mais basé sur participants totaux)
+    #Calcul des limites (inchangé mais basé sur participants totaux)
     new_meetings_per_round = capacity - 1
     max_theoretical_rounds = (len(participants) - 1) // new_meetings_per_round if new_meetings_per_round > 0 else 1
+    
     
     if time_per_round > 0:
         effective_time_per_round = time_per_round
@@ -73,8 +74,8 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
 
     return {
         "metadata": {
-            "real_participants": participantCountLabel,
-            "ghosts_added": num_ghosts,
+            "participants_reels": participantCountLabel,
+            "spectres_added": total_slots - participantCountLabel,
             "tables": tableCountLabel,
             "time_per_round": effective_time_per_round,
             "rounds_generated": len(all_rounds)
