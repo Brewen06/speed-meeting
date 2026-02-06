@@ -9,7 +9,9 @@ class ParticipantBase(BaseModel):
     nom: str
     prenom: str
     mail: Optional[str] = None
+    profession: Optional[str] = None
     entreprise: Optional[str] = None
+    thematique_interet: Optional[str] = None
 
 class ParticipantCreate(ParticipantBase):
     pass
@@ -25,7 +27,6 @@ class TableBase(BaseModel):
     x: float
     y: float
     capacite: int
-    thematique: Optional[str] = None
 
 class RoundBase(BaseModel): 
     numero: int
@@ -41,11 +42,10 @@ class AffectationBase(BaseModel):
 
 class Participant(ParticipantBase):
     id: int
-    model_config = ConfigDict(from_attributes=True) # Nouveau format Pydantic v2
+    model_config = ConfigDict(from_attributes=True) 
 
 class MeetingSession(MeetingSessionBase):
     id: int
-    # On peut inclure la liste des participants inscrits à cet événement
     participants: List[Participant] = []
     model_config = ConfigDict(from_attributes=True)
 
@@ -59,10 +59,9 @@ class Round(RoundBase):
 
 class Affectation(AffectationBase):
     id: int
-    # Ces champs permettent au Frontend de recevoir l'objet complet au lieu de simples ID
     participant: Optional[Participant] = None
     table: Optional[Table] = None
-    round_info: Optional[Round] = None # Renommé pour éviter conflit avec le type Round
+    round_info: Optional[Round] = None 
     
     model_config = ConfigDict(from_attributes=True)
 
