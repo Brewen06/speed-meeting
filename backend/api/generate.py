@@ -16,32 +16,18 @@ class SessionConfig(BaseModel):
 def create_session(config: SessionConfig, db: Session = Depends(get_db)):
     
     db_participants = db.query(Participant).all()
-    participant_names = [p.name for p in db_participants]
+    participant_noms = [p.name for p in db_participants]
     
-    participant_count = len(participant_names)
+    participantCountLabel = len(participant_noms)
 
-    if participant_count == 0:
-        raise HTTPException(status_code=400, detail="Aucun participant inscrit en base de données.")
+    if not participant_noms:
+        raise HTTPException(status_code=400, detail="La liste des participants est vide. Importez un fichier d'abord !")
 
-    generation_result = generate_rounds(
-        participant_count,
-        config.tableCountLabel,
-        config.sessionDurationLabel,
-        config.time_per_round,
-    )
-
-    new_session = MeetingSession(
-        total_duration_minutes=config.sessionDurationLabel,
-        number_of_tables=config.tableCountLabel,
-        rounds_data=generation_result
+    result = generate_rounds(
+        participant_data=participant_noms, # On passe la liste ici !
+        table_count=config.tableCountLabel,
+        session_duration=config.sessionDurationLabel,
+        time_per_round=config.time_per_round
     )
     
-    db.add(new_session)
-    db.commit()
-    db.refresh(new_session)
-
-    return {
-        "session_id": new_session.id,
-        "metadata": generation_result.get("metadata"),
-        "rounds": generation_result.get("rounds")
-    }
+    return result

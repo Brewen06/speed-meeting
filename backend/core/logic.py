@@ -76,6 +76,7 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
             tables_data.append({
                 "table_id": t_idx + 1,
                 "table_name": f"Table {t_idx + 1}",
+                "table_thematique": None,  # Placeholder, peut être enrichi plus tard
                 "members": participants_at_table
             })
         

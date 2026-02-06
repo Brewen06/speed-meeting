@@ -10,7 +10,8 @@ class Participant(Base):
 class Table(Base):
     __tablename__ = "tables"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String) 
+    name = Column(String)
+    thematique = Column(String, nullable=True) 
 
 class MeetingSession(Base):
     __tablename__ = "sessions"

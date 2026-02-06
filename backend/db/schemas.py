@@ -25,6 +25,7 @@ class TableBase(BaseModel):
     x: float
     y: float
     capacite: int
+    thematique: Optional[str] = None
 
 class RoundBase(BaseModel): 
     numero: int
