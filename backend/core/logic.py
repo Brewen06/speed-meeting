@@ -1,4 +1,4 @@
-import random
+﻿import random
 
 def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel, time_per_round):
     # Gestionnaire des participants et des places vides
@@ -8,8 +8,8 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
     total_slots = -(-participantCountLabel // tableCountLabel) * tableCountLabel
     num_spectres = total_slots - participantCountLabel
     
-    # Ajout des participants "PAUSE" pour équilibrer les tables
-    spectres = [f"PAUSE {i+1}" for i in range(num_spectres)]
+    # Ajout des participants "rien" pour équilibrer les tables
+    spectres = [f"rien {i+1}" for i in range(num_spectres)]
     participants = participants_reels + spectres
 
     if tableCountLabel <= 0: 
@@ -65,9 +65,9 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
         # Mise à jour de l'historique
         for table in tables:
             for p1 in table:
-                if "PAUSE" in p1: continue # Les fantômes ne comptent pas dans l'historique
+                if "rien" in p1: continue # Les fantômes ne comptent pas dans l'historique
                 for p2 in table:
-                    if p1 != p2 and "PAUSE" not in p2:
+                    if p1 != p2 and "rien" not in p2:
                         history[p1].add(p2)
         
         # Construction du round_data avec la structure correcte
@@ -76,7 +76,6 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
             tables_data.append({
                 "table_id": t_idx + 1,
                 "table_name": f"Table {t_idx + 1}",
-                "table_thematique": None,  # Placeholder, peut être enrichi plus tard
                 "members": participants_at_table
             })
         
