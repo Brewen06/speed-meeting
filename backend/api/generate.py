@@ -17,7 +17,8 @@ class SessionConfig(BaseModel):
 def create_session(config: SessionConfig, db: Session = Depends(get_db)):
     
     db_participants = db.query(Participant).all()
-    participant_names = [p.nom_complet for p in db_participants if p.nom_complet]
+    participant_names = list(set([p.nom_complet for p in db_participants if p.nom_complet]))
+    # ...rest of code...
 
     if not participant_names:
         raise HTTPException(status_code=400, detail="La liste des participants est vide. Importez un fichier d'abord !")

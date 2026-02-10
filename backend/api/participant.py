@@ -36,6 +36,7 @@ async def upload_participants(
         col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
         col_nom_complet = get_column("nom complet", "Nom Complet", "Nom complet", "full name", "Full name", "Full Name", "fullname", "Fullname", "FULLNAME", "FULL NAME")
         col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL")
+        col_theme = get_column("thème", "thématique", "theme", "thematique", "category", "pôle", "secteur")
 
         participants_rows = []
         for _, row in df.iterrows():
@@ -43,7 +44,7 @@ async def upload_participants(
             prenom = str(row[col_prenom]).strip() if col_prenom and pd.notna(row[col_prenom]) else ""
             nom_complet = str(row[col_nom_complet]).strip() if col_nom_complet and pd.notna(row[col_nom_complet]) else ""
             email = str(row[col_email]).strip() if col_email and pd.notna(row[col_email]) else None
-
+            theme = str(row[col_theme]).strip() if col_theme and pd.notna(row[col_theme]) else None
             if not nom_complet:
                 nom_complet = " ".join(part for part in [prenom, nom] if part).strip()
 
@@ -55,6 +56,7 @@ async def upload_participants(
                 "prenom": prenom,
                 "nom_complet": nom_complet,
                 "email": email or None,
+                "theme": theme or None
             })
 
         if not participants_rows:
@@ -66,6 +68,7 @@ async def upload_participants(
                 prenom=row["prenom"],
                 nom_complet=row["nom_complet"],
                 email=row["email"],
+                theme=row["theme"]
             )
             for row in participants_rows
         ]
@@ -120,6 +123,10 @@ def search_participants(q: str = "", db: Session = Depends(get_db)):
         "count": len(participants)
     }
 
+    # ajouter un bouton de suppression à côté de chaque participant ainsi qu'un bouton de modification dans l'interface d'administration pour pouvoir corriger les erreurs d'import ou les fautes de frappe, etc.
+    
+
+
 @router.post("/participants/add")
 def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db)):
     nom = (participant.nom or "").strip()
@@ -151,10 +158,7 @@ def delete_participant(participant_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/participants/clear")
-def clear_participants(
-    db: Session = Depends(get_db), 
-    #admin: str = Depends(get_current_admin) # <--- La route est maintenant protégée !
-):
+def clear_participants(db: Session = Depends(get_db)): #N'OUBLIES PAS L'AUTHENTIFICATION ADMIN !!!!!!!!!!!!!!!
     db.query(Participant).delete()
     db.commit()
     return {"message": "Nettoyage effectué"}
@@ -258,7 +262,8 @@ def get_participant_itinerary(
                     itinerary.append({
                         "rotation": round_num,
                         "table": table_info.get("table_id"),
-                        "table_name": table_info.get("table_name", f"Table {table_info.get('table_id')}")
+                        "table_name": table_info.get("table_name", f"Table {table_info.get('table_id')}"),
+                        "theme": table_info.get("theme", "Thème non spécifié")
                     })
                     break
     
