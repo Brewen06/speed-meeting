@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+  const router = useRouter();
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -17,6 +19,14 @@ export default function Header() {
 
     checkAuth();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("participant");
+    localStorage.removeItem("role");
+    setIsConnected(false);
+    router.push("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl border-b border-slate-700">
@@ -44,9 +54,12 @@ export default function Header() {
                   {isConnected ? '✓ Connecté' : <a href="/authentification/connexion">Se connecter</a>}
                 </span>
                 {isConnected && (
-                  <a href="/authentification/deconnexion" className="text-sm px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 transition-colors">
+                  <button
+                    onClick={handleLogout}
+                    className="text-sm px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 transition-colors cursor-pointer font-medium"
+                  >
                     Se déconnecter
-                  </a>
+                  </button>
                 )}
                 {!isConnected && (
                   <a href="/authentification/admin" className="text-sm px-3 py-1 rounded-full bg-orange-600 hover:bg-orange-700 transition-colors">
