@@ -12,6 +12,9 @@ class Settings:
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
+    # CORS - Origines autorisées (séparées par des virgules dans .env)
+    CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") else ["*"]
+    
     # Paramètres par défaut de l'algorithme
     DEFAULT_TIME_PER_ROUND: int = 10
     DEFAULT_SESSION_DURATION: int = 60

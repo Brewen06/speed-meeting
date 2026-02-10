@@ -5,10 +5,10 @@ from datetime import datetime
 # SCHEMAS DE BASE
 
 class ParticipantBase(BaseModel):
-    id: int
     nom: str
     prenom: str
-    mail: Optional[str] = None
+    nom_complet: Optional[str] = None
+    email: Optional[str] = None
     profession: Optional[str] = None
     entreprise: Optional[str] = None
     thematique_interet: Optional[str] = None

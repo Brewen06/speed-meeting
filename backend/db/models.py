@@ -8,9 +8,11 @@ class Participant(Base):
     id = Column(Integer, primary_key=True, index=True)
     nom = Column(String)
     prenom = Column(String)
-    nom_complet = Column(String)
-    email = Column(String, nullable=True)
-    theme = Column(String, nullable=True)
+    nom_complet = Column(String, index=True)
+    email = Column(String, nullable=True, index=True)
+    profession = Column(String, nullable=True)
+    entreprise = Column(String, nullable=True)
+    thematique_interet = Column(String, nullable=True)
     affectations = relationship("ParticipantTableAssignment", back_populates="participant")
     priority_partner_id = Column(Integer, ForeignKey("participants.id"), nullable=True)
 
@@ -18,7 +20,9 @@ class Table(Base):
     __tablename__ = "tables"
     id = Column(Integer, primary_key=True, index=True)
     nom = Column(String)
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=True)
     affectations = relationship("ParticipantTableAssignment", back_populates="table")
+    session = relationship("MeetingSession", back_populates="tables")
 
 class MeetingSession(Base):
     __tablename__ = "sessions"
@@ -28,6 +32,7 @@ class MeetingSession(Base):
     number_of_tables = Column(Integer)
     rounds_data = Column(JSON)
     assignment_rows = relationship("ParticipantTableAssignment", back_populates="session")
+    tables = relationship("Table", back_populates="session")
 
 class ParticipantTableAssignment(Base):
     __tablename__ = "participant_table_assignments"
@@ -40,3 +45,4 @@ class ParticipantTableAssignment(Base):
     participant = relationship("Participant", back_populates="affectations")
     table = relationship("Table", back_populates="affectations")
     session = relationship("MeetingSession", back_populates="assignment_rows")
+

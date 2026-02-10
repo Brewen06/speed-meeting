@@ -1,6 +1,5 @@
-import datetime
+from datetime import datetime, timezone
 from fastapi import FastAPI, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from db.database import engine, Base, get_db
 from db.models import Participant, MeetingSession
@@ -13,16 +12,34 @@ from middleware import setup_middlewares
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Speed Meeting AI API")
+app = FastAPI(
+    title="Speed Meeting AI API",
+    version="1.0.0",
+    description="API pour générer et gérer des sessions de speed meeting",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 setup_middlewares(app)
 
 app.include_router(generate_router, prefix="/api", tags=["api"])
 app.include_router(participant_router, prefix="/api", tags=["participants"])
 
-@app.get("/")
-def root():
-    return {"message": "Serveur Speed Meeting opérationnel", "status": "online"}
+@app.get("/", tags=["health"])
+def root(db: Session = Depends(get_db)):
+    """Healthcheck endpoint avec vérification de la base de données"""
+    try:
+        db.execute("SELECT 1")
+        db_status = "connected"
+    except Exception:
+        db_status = "disconnected"
+    
+    return {
+        "message": "Serveur Speed Meeting opérationnel",
+        "status": "online",
+        "database": db_status,
+        "version": "1.0.0"
+    }
 
 class CoreConfig(BaseModel):
     tableCountLabel: int
@@ -58,11 +75,16 @@ def core_route(config: CoreConfig, db: Session = Depends(get_db)): # N'OUBLIES P
         total_duration_minutes=config.sessionDurationLabel,
         number_of_tables=config.tableCountLabel,
         rounds_data=result.get("rounds", []),
-        created_at=datetime.datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
-    db.add(new_session)
-    db.commit()
-    db.refresh(new_session)
+    
+    try:
+        db.add(new_session)
+        db.commit()
+        db.refresh(new_session)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la sauvegarde : {str(e)}")
     
     return {
         "session_id": new_session.id,

@@ -1,6 +1,16 @@
 ﻿import random
+import logging
 
-def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, time_per_round):
+logger = logging.getLogger(__name__)
+
+def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, time_per_round, seed=None):
+    """Génère les rounds de speed meeting avec placement optimisé des participants"""
+    
+    # Configuration du seed pour reproductibilité (utile pour les tests)
+    if seed is not None:
+        random.seed(seed)
+        logger.debug(f"🎲 Seed défini : {seed}")
+    
     # Gestionnaire des participants et des places vides
     if isinstance(participants_input, list):
         participants_reels = [p.strip() for p in participants_input if str(p).strip()]
@@ -9,12 +19,20 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
         participant_count = int(participants_input)
         participants_reels = [f"Participant {i+1}" for i in range(participant_count)]
     
-    # Calcul de places il faut au total pour remplir les tables
+    logger.info(f"🎯 Génération de rounds : {participant_count} participants, {tableCountLabel} tables, {sessionDurationLabel}min")
+    
+    # Validations des paramètres
     if tableCountLabel <= 0:
         return {"error": "Nombre de tables doit être > 0"}
 
     if participant_count <= 0:
         return {"error": "Aucun participant fourni"}
+    
+    if tableCountLabel > participant_count:
+        return {"error": f"Nombre de tables ({tableCountLabel}) supérieur au nombre de participants ({participant_count})"}
+    
+    if time_per_round > 0 and sessionDurationLabel < time_per_round:
+        return {"error": f"Durée de session ({sessionDurationLabel}min) inférieure au temps par round ({time_per_round}min)"}
 
     total_slots = -(-participant_count // tableCountLabel) * tableCountLabel
     num_spectres = total_slots - participant_count
@@ -94,6 +112,8 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
 
         all_rounds.append(round_data)
 
+    logger.info(f"✅ {len(all_rounds)} rounds générés avec succès | Participants réels: {participant_count} | Fantômes: {num_spectres}")
+    
     return {
         "metadata": {
             "participants_reels": participant_count,
