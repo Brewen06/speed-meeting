@@ -39,9 +39,21 @@ export default function Header() {
               Accueil
             </a>
             {isConnected !== null && (
-              <span className="text-sm px-3 py-1 rounded-full bg-slate-700">
-                {isConnected ? '✓ Connecté' : <a href="/authentification/connexion">Se connecter</a>}
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm px-3 py-1 rounded-full bg-slate-700">
+                  {isConnected ? '✓ Connecté' : <a href="/authentification/connexion">Se connecter</a>}
+                </span>
+                {isConnected && (
+                  <a href="/authentification/deconnexion" className="text-sm px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 transition-colors">
+                    Se déconnecter
+                  </a>
+                )}
+                {!isConnected && (
+                  <a href="/authentification/admin" className="text-sm px-3 py-1 rounded-full bg-orange-600 hover:bg-orange-700 transition-colors">
+                    Admin
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </nav>

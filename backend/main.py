@@ -6,6 +6,7 @@ from db.models import Participant, MeetingSession
 from api.generate import router as generate_router
 from api.participant import router as participant_router
 from api.auth import get_current_admin
+from api.auth import router as auth_router
 from core.logic import generate_rounds
 from pydantic import BaseModel
 from middleware import setup_middlewares
@@ -24,6 +25,7 @@ setup_middlewares(app)
 
 app.include_router(generate_router, prefix="/api", tags=["api"])
 app.include_router(participant_router, prefix="/api", tags=["participants"])
+app.include_router(auth_router, prefix="/api", tags=["auth"])
 
 @app.get("/", tags=["health"])
 def root(db: Session = Depends(get_db)):

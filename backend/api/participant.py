@@ -97,10 +97,35 @@ class ParticipantCreate(BaseModel):
     nom_complet: str | None = None
     email: str | None = None
 
+class ParticipantLogin(BaseModel):
+    nom_complet: str
+    email: str | None = None
+
 @router.get("/participants")
 def get_all_participants(db: Session = Depends(get_db)):
     
     return db.query(Participant).all()
+
+@router.post("/participants/login")
+def login_participant(payload: ParticipantLogin, db: Session = Depends(get_db)):
+    nom_complet = (payload.nom_complet or "").strip()
+    email = (payload.email or "").strip() or None
+
+    if not nom_complet:
+        raise HTTPException(status_code=400, detail="Nom Complet requis")
+
+    query = db.query(Participant).filter(Participant.nom_complet.ilike(nom_complet))
+    if email:
+        query = query.filter(Participant.email.ilike(email))
+
+    participant = query.first()
+    if not participant:
+        raise HTTPException(status_code=401, detail="Participant non reconnu")
+
+    return {
+        "token": f"participant:{participant.id}",
+        "participant": participant
+    }
 
 @router.get("/participants/search")
 def search_participants(q: str = "", db: Session = Depends(get_db)):

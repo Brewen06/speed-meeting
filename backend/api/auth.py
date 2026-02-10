@@ -19,3 +19,13 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
             headers={"WWW-Authenticate": "Basic"},
         )
     return credentials.username
+
+
+@router.post("/auth/admin/login")
+def admin_login(credentials: HTTPBasicCredentials = Depends(security)):
+    admin_username = get_current_admin(credentials)
+    return {
+        "token": "admin",
+        "role": "admin",
+        "username": admin_username
+    }

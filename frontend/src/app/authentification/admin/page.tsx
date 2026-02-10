@@ -1,0 +1,137 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
+
+export default function AdminConnexion() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const credentials = btoa(`${username}:${password}`);
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin/login`, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${credentials}`,
+        },
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        setError(payload?.detail ?? "Connexion impossible.");
+        setIsLoading(false);
+        return;
+      }
+
+      localStorage.setItem("token", payload.token);
+      localStorage.setItem("role", payload.role);
+      router.push("/interface-admin");
+    } catch {
+      setError("Erreur reseau. Veuillez reessayer.");
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className="relative min-h-screen overflow-hidden bg-[#eef2ff] text-slate-900 font-sans"
+    >
+      <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-[#f97316]/30 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-6 h-80 w-80 rounded-full bg-[#38bdf8]/30 blur-3xl" />
+
+      <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-6 py-20">
+        <section className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="flex flex-col justify-center gap-6">
+            <p className="text-sm uppercase tracking-[0.35em] text-slate-500">
+              Acces admin
+            </p>
+            <h1
+              className="text-4xl font-bold leading-tight text-slate-900 md:text-5xl"
+            >
+              Pilotez la session en toute confiance.
+            </h1>
+            <p className="max-w-xl text-base text-slate-600 md:text-lg">
+              Cette connexion est reservee a l'organisateur. Utilisez vos
+              identifiants admin pour lancer les parametres et importer les
+              invites.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <a
+                href="/authentification/connexion"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+              >
+                Acces invites
+              </a>
+              <a
+                href="/"
+                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-slate-700 underline decoration-[#f97316] decoration-2 underline-offset-4 transition hover:text-slate-900"
+              >
+                Retour accueil
+              </a>
+            </div>
+          </div>
+
+          <div className="rounded-[32px] border border-white/70 bg-white/80 p-8 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] backdrop-blur">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-slate-900">
+                Connexion administrateur
+              </h2>
+              <p className="text-sm text-slate-500">
+                Utilisez les identifiants definis dans le backend.
+              </p>
+            </div>
+
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <label className="block text-sm font-semibold text-slate-700">
+                Nom d'utilisateur
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="admin"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#f97316] focus:outline-none focus:ring-2 focus:ring-[#f97316]/40"
+                  required
+                />
+              </label>
+
+              <label className="block text-sm font-semibold text-slate-700">
+                Mot de passe
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Votre mot de passe"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#38bdf8] focus:outline-none focus:ring-2 focus:ring-[#38bdf8]/40"
+                  required
+                />
+              </label>
+
+              {error ? (
+                <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {error}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full rounded-2xl bg-[#0f172a] px-5 py-3 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-[#111827] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isLoading ? "Connexion..." : "Acceder"}
+              </button>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
