@@ -8,13 +8,11 @@ class Participant(Base):
     id = Column(Integer, primary_key=True, index=True)
     nom = Column(String)
     prenom = Column(String)
-    nom_complet = Column(String, index=True)
-    email = Column(String, nullable=True, index=True)
+    nom_complet = Column(String)
+    email = Column(String, nullable=True)
     profession = Column(String, nullable=True)
     entreprise = Column(String, nullable=True)
-    thematique_interet = Column(String, nullable=True)
     affectations = relationship("ParticipantTableAssignment", back_populates="participant")
-    priority_partner_id = Column(Integer, ForeignKey("participants.id"), nullable=True)
 
 class Table(Base):
     __tablename__ = "tables"

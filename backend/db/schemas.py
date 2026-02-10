@@ -11,7 +11,6 @@ class ParticipantBase(BaseModel):
     email: Optional[str] = None
     profession: Optional[str] = None
     entreprise: Optional[str] = None
-    thematique_interet: Optional[str] = None
 
 class ParticipantCreate(ParticipantBase):
     pass

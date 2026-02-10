@@ -36,7 +36,8 @@ async def upload_participants(
         col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
         col_nom_complet = get_column("nom complet", "Nom Complet", "Nom complet", "full name", "Full name", "Full Name", "fullname", "Fullname", "FULLNAME", "FULL NAME")
         col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL")
-        col_theme = get_column("thème", "thématique", "theme", "thematique", "category", "pôle", "secteur")
+        col_profession = get_column("poste", "Poste", "POSTE", "profession", "Profession", "PROFESSION", "job title", "Job title", "JOB TITLE", "job", "Job", "JOB")
+        col_entreprise = get_column("société", "Société", "SOCIÉTÉ", "entreprise", "Entreprise", "ENTREPRISE", "company", "Company", "COMPANY", "organization", "Organization", "ORGANIZATION", "organisation", "Organisation", "ORGANISATION")
 
         participants_rows = []
         for _, row in df.iterrows():
@@ -44,7 +45,9 @@ async def upload_participants(
             prenom = str(row[col_prenom]).strip() if col_prenom and pd.notna(row[col_prenom]) else ""
             nom_complet = str(row[col_nom_complet]).strip() if col_nom_complet and pd.notna(row[col_nom_complet]) else ""
             email = str(row[col_email]).strip() if col_email and pd.notna(row[col_email]) else None
-            theme = str(row[col_theme]).strip() if col_theme and pd.notna(row[col_theme]) else None
+            profession = str(row[col_profession]).strip() if col_profession and pd.notna(row[col_profession]) else None
+            entreprise = str(row[col_entreprise]).strip() if col_entreprise and pd.notna(row[col_entreprise]) else None
+            
             if not nom_complet:
                 nom_complet = " ".join(part for part in [prenom, nom] if part).strip()
 
@@ -56,7 +59,8 @@ async def upload_participants(
                 "prenom": prenom,
                 "nom_complet": nom_complet,
                 "email": email or None,
-                "theme": theme or None
+                "profession": profession or None,
+                "entreprise": entreprise or None
             })
 
         if not participants_rows:
@@ -68,7 +72,8 @@ async def upload_participants(
                 prenom=row["prenom"],
                 nom_complet=row["nom_complet"],
                 email=row["email"],
-                theme=row["theme"]
+                profession=row["profession"],
+                entreprise=row["entreprise"]
             )
             for row in participants_rows
         ]
@@ -263,7 +268,6 @@ def get_participant_itinerary(
                         "rotation": round_num,
                         "table": table_info.get("table_id"),
                         "table_name": table_info.get("table_name", f"Table {table_info.get('table_id')}"),
-                        "theme": table_info.get("theme", "Thème non spécifié")
                     })
                     break
     

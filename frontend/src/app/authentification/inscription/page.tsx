@@ -22,8 +22,7 @@ export default function Inscription() {
             Créez votre compte invité pour participer au speed meeting.
           </p>
           <form className="flex flex-col gap-4 w-full max-w-sm">
-            <input type="text" name="Nom de famille" placeholder="Nom de famille" className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required />
-            <input type="text" name="Prénom" placeholder="Prénom" className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required />
+            <input type="text" name="Nom Complet" placeholder="Nom Complet (Prénom + Nom)" className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required />
             <input type="password" name="Mot de passe" placeholder="Mot de passe" className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required />
             <button type="submit" className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
               S'inscrire
