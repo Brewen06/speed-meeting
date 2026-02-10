@@ -6,14 +6,18 @@ import { useRouter } from 'next/navigation';
 export default function Header() {
   const router = useRouter();
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
         setIsConnected(!!token);
+        setIsAdmin(role === 'admin');
       } catch {
         setIsConnected(false);
+        setIsAdmin(false);
       }
     };
 
@@ -25,6 +29,7 @@ export default function Header() {
     localStorage.removeItem("participant");
     localStorage.removeItem("role");
     setIsConnected(false);
+    setIsAdmin(false);
     router.push("/");
   };
 
@@ -48,6 +53,16 @@ export default function Header() {
             <a href="/" className="hover:text-blue-400 transition-colors">
               Accueil
             </a>
+            {isConnected && (
+              <a href="/interface-invite/attente" className="hover:text-blue-400 transition-colors">
+                Mon interface
+              </a>
+            )}
+            {isAdmin && (
+              <a href="/interface-admin" className="hover:text-blue-400 transition-colors">
+                Page d'administration
+              </a>
+            )}
             {isConnected !== null && (
               <div className="flex items-center gap-4">
                 <span className="text-sm px-3 py-1 rounded-full bg-slate-700">
