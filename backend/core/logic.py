@@ -1,20 +1,28 @@
 ﻿import random
 
-def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel, time_per_round):
+def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, time_per_round):
     # Gestionnaire des participants et des places vides
-    participants_reels = [f"Participant {i+1}" for i in range(participantCountLabel)]
+    if isinstance(participants_input, list):
+        participants_reels = [p.strip() for p in participants_input if str(p).strip()]
+        participant_count = len(participants_reels)
+    else:
+        participant_count = int(participants_input)
+        participants_reels = [f"Participant {i+1}" for i in range(participant_count)]
     
     # Calcul de places il faut au total pour remplir les tables
-    total_slots = -(-participantCountLabel // tableCountLabel) * tableCountLabel
-    num_spectres = total_slots - participantCountLabel
+    if tableCountLabel <= 0:
+        return {"error": "Nombre de tables doit être > 0"}
+
+    if participant_count <= 0:
+        return {"error": "Aucun participant fourni"}
+
+    total_slots = -(-participant_count // tableCountLabel) * tableCountLabel
+    num_spectres = total_slots - participant_count
     
     # Ajout des participants "rien" pour équilibrer les tables
     spectres = [f"rien {i+1}" for i in range(num_spectres)]
     participants = participants_reels + spectres
 
-    if tableCountLabel <= 0: 
-        return {"error": "Nombre de tables doit être > 0"}
-    
     capacity = len(participants) // tableCountLabel
 
     #Calcul des limites (inchangé mais basé sur participants totaux)
@@ -88,8 +96,8 @@ def generate_rounds(participantCountLabel, tableCountLabel, sessionDurationLabel
 
     return {
         "metadata": {
-            "participants_reels": participantCountLabel,
-            "spectres_added": total_slots - participantCountLabel,
+            "participants_reels": participant_count,
+            "spectres_added": total_slots - participant_count,
             "tables": tableCountLabel,
             "time_per_round": effective_time_per_round,
             "rounds_generated": len(all_rounds)

@@ -6,7 +6,10 @@ import datetime
 class Participant(Base):
     __tablename__ = "participants"  
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    nom = Column(String)
+    prenom = Column(String)
+    nom_complet = Column(String)
+    email = Column(String, nullable=True)
     theme = Column(String, nullable=True)
     affectations = relationship("ParticipantTableAssignment", back_populates="participant")
     
@@ -14,7 +17,7 @@ class Participant(Base):
 class Table(Base):
     __tablename__ = "tables"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    nom = Column(String)
     affectations = relationship("ParticipantTableAssignment", back_populates="table")
 
 class MeetingSession(Base):
