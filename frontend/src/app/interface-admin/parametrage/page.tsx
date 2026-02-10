@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { AdminProtected } from "@/lib/protected-routes";
 
-export default function Home() {
+function ParametrageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
       <main className="mx-auto flex w-full max-w-2xl flex-col items-center justify-start py-12 px-6 sm:py-20">
@@ -70,5 +71,13 @@ export default function Home() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <AdminProtected>
+      <ParametrageContent />
+    </AdminProtected>
   );
 }

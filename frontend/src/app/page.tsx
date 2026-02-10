@@ -1,5 +1,8 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 export default function Home() {
   return (
@@ -17,7 +20,7 @@ export default function Home() {
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             Speed Meeting
           </h1>
-            <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 text-justify">
+          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 text-justify">
             <b>Contexte</b>: Un repas d'affaires organisé par la FFI (<b>F</b>orces <b>F</b>rançaises de l'<b>I</b>ndustrie) réunit des professionnels de divers secteurs pour échanger et établir des contacts en partageant leur activité professionnelle et leur parcours.
             <br />
             <br />
@@ -31,17 +34,55 @@ export default function Home() {
             <br />
             <br />
             <b className="text-red-500">Attention</b>: Les invités ne doivent pas rencontrer la même personne une seconde fois. Ainsi, il n'est pas obligatoire que toutes les personnes se rencontrent.
-            </p>
+          </p>
         </div>
-        <div className="mt-10 flex gap-4">
-          <Link href="/interface-admin" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            Interface Admin
-          </Link>
-          <Link href="/interface-invite" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-            Interface Invité
-          </Link>
-        </div>
+        <ClientOnly />
       </main>
     </div>
   );
+}
+
+function ClientOnly() {
+  'use client';
+  
+  const { isConnected, isAdmin } = useAuthState();
+
+  return (
+    <div className="mt-10 flex gap-4">
+      {isConnected && !isAdmin && (
+        <Link href="/interface-invite" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+          Interface Invité
+        </Link>
+      )}
+      {isAdmin && (
+        <>
+          <Link href="/interface-invite" className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+            Interface Invité
+          </Link>
+          <Link href="/interface-admin" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Interface Admin
+          </Link>
+        </>
+      )}
+    </div>
+  );
+}
+
+function useAuthState() {
+  const [isConnected, setIsConnected] = React.useState(false);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+      setIsConnected(!!token);
+      setIsAdmin(role === "admin");
+    } catch {
+      setIsConnected(false);
+      setIsAdmin(false);
+    }
+  }, []);
+
+  return { isConnected, isAdmin };
 }

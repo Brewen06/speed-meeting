@@ -1,7 +1,9 @@
-import { ignoreListAnonymousStackFramesIfSandwiched } from "next/dist/next-devtools/server/shared";
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React from "react";
+import { ParticipantProtected } from "@/lib/protected-routes";
+
+function ParticipantContent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -15,5 +17,13 @@ export default function Home() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <ParticipantProtected>
+      <ParticipantContent />
+    </ParticipantProtected>
   );
 }
