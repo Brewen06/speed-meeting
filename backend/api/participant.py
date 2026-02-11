@@ -98,6 +98,12 @@ class ParticipantCreate(BaseModel):
     nom_complet: str | None = None
     email: str | None = None
 
+class ParticipantUpdate(BaseModel):
+    nom_complet: str | None = None
+    email: str | None = None
+    profession: str | None = None
+    entreprise: str | None = None
+
 class ParticipantActiveUpdate(BaseModel):
     is_active: bool
 
@@ -200,6 +206,39 @@ def update_participant_active(
         "nom_complet": participant.nom_complet,
         "is_active": participant.is_active
     }
+
+@router.patch("/participants/{participant_id}")
+def update_participant(
+    participant_id: int,
+    payload: ParticipantUpdate,
+    db: Session = Depends(get_db),
+    current_admin: Participant = Depends(get_current_admin)
+):
+    participant = db.query(Participant).filter(Participant.id == participant_id).first()
+    if not participant:
+        raise HTTPException(status_code=404, detail="Participant non trouvé")
+
+    if payload.nom_complet is not None:
+        nom_complet = payload.nom_complet.strip()
+        if not nom_complet:
+            raise HTTPException(status_code=400, detail="Nom Complet requis")
+        participant.nom_complet = nom_complet
+
+    if payload.email is not None:
+        email = payload.email.strip()
+        participant.email = email or None
+
+    if payload.profession is not None:
+        profession = payload.profession.strip()
+        participant.profession = profession or None
+
+    if payload.entreprise is not None:
+        entreprise = payload.entreprise.strip()
+        participant.entreprise = entreprise or None
+
+    db.commit()
+    db.refresh(participant)
+    return participant
 
 @router.delete("/participants/delete") # suppression d'un participant spécifique
 def delete_participant(participant_id: int, db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)  ):

@@ -21,6 +21,13 @@ function ParticipantsContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [isSavingId, setIsSavingId] = useState<number | null>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
+    const [editNomComplet, setEditNomComplet] = useState("");
+    const [editEmail, setEditEmail] = useState("");
+    const [editProfession, setEditProfession] = useState("");
+    const [editEntreprise, setEditEntreprise] = useState("");
+    const [editEmailError, setEditEmailError] = useState("");
 
     const adminAuthHeader = useMemo(() => {
         const credentials = btoa("admin:5Pid6M3f!nG");
@@ -118,9 +125,165 @@ function ParticipantsContent() {
         }
     };
 
+    const handleDeleteParticipant = async (id: number) => {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer ce participant ?")) {
+            return;
+        }
+
+        setIsSavingId(id);
+        setError("");
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/api/participants/delete?participant_id=${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": adminAuthHeader,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                const payload = await response.json();
+                setError(payload?.detail ?? "Suppression impossible.");
+                setIsSavingId(null);
+                return;
+            }
+
+            setParticipants((prev) => prev.filter((p) => p.id !== id));
+            setIsSavingId(null);
+        } catch {
+            setError("Erreur réseau. Veuillez réessayer.");
+            setIsSavingId(null);
+        }
+    };
+
+    const handleClear = async () => {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer tous les participants ?")) {
+            return;
+        }
+
+        setIsLoading(true);
+        setError("");
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/participants/clear`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": adminAuthHeader,
+                },
+            });
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                setError(payload?.detail ?? "Suppression impossible.");
+                setIsLoading(false);
+                return;
+            }
+
+            setParticipants([]);
+            setSearch("");
+            setIsLoading(false);
+        } catch {
+            setError("Erreur réseau. Veuillez réessayer.");
+            setIsLoading(false);
+        }
+    };
+
+    const openEditModal = (participant: Participant) => {
+        setEditingParticipant(participant);
+        setEditNomComplet(participant.nom_complet ?? "");
+        setEditEmail(participant.email ?? "");
+        setEditProfession(participant.profession ?? "");
+        setEditEntreprise(participant.entreprise ?? "");
+        setEditEmailError("");
+        setIsEditOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditOpen(false);
+        setEditingParticipant(null);
+    };
+
+    const hasEdits = editingParticipant
+        ? editNomComplet.trim() !== (editingParticipant.nom_complet ?? "")
+        || editEmail.trim() !== (editingParticipant.email ?? "")
+        || editProfession.trim() !== (editingParticipant.profession ?? "")
+        || editEntreprise.trim() !== (editingParticipant.entreprise ?? "")
+        : false;
+
+    const validateEmail = (value: string) => {
+        if (!value.trim()) {
+            return "";
+        }
+        return /.+@.+\..+/.test(value) ? "" : "Email invalide.";
+    };
+
+    const saveParticipantEdit = async () => {
+        if (!editingParticipant) {
+            return;
+        }
+
+        const trimmedNom = editNomComplet.trim();
+        if (trimmedNom.length === 0) {
+            setError("Le nom complet ne peut pas etre vide.");
+            return;
+        }
+
+        const emailError = validateEmail(editEmail);
+        if (emailError) {
+            setEditEmailError(emailError);
+            return;
+        }
+        setEditEmailError("");
+
+        setIsSavingId(editingParticipant.id);
+        setError("");
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/api/participants/${editingParticipant.id}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": adminAuthHeader,
+                    },
+                    body: JSON.stringify({
+                        nom_complet: trimmedNom,
+                        email: editEmail.trim(),
+                        profession: editProfession.trim(),
+                        entreprise: editEntreprise.trim(),
+                    }),
+                }
+            );
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                setError(payload?.detail ?? "Mise a jour impossible.");
+                setIsSavingId(null);
+                return;
+            }
+
+            setParticipants((prev) =>
+                prev.map((item) =>
+                    item.id === editingParticipant.id ? payload : item
+                )
+            );
+            setIsSavingId(null);
+            closeEditModal();
+        } catch {
+            setError("Erreur réseau. Veuillez réessayer.");
+            setIsSavingId(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
-            <main className="mx-auto flex w-full max-w-6xl flex-col items-center justify-start py-12 px-6 sm:py-20">
+            <main className="mx-auto flex w-full max-w-7xl flex-col items-center justify-start py-12 px-6 sm:py-20">
                 <div className="w-full space-y-8">
                     <div className="space-y-3">
                         <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
@@ -154,14 +317,21 @@ function ParticipantsContent() {
                         <div className="text-sm text-zinc-600 dark:text-zinc-400">
                             {participants.length} participant{participants.length > 1 ? "s" : ""}
                         </div>
+                        <button
+                            onClick={handleClear}
+                            className="ml-4 inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                            Réinitialiser
+                        </button>
                     </div>
 
                     <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                        <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
+                        <div className="grid grid-cols-15 gap-4 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
                             <div className="col-span-4">Participant</div>
                             <div className="col-span-3">Entreprise</div>
                             <div className="col-span-3">Email</div>
-                            <div className="col-span-2 text-right">Actif</div>
+                            <div className="col-span-2 text-center">Actif</div>
+                            <div className="col-span-3 text-center">Actions</div>
                         </div>
 
                         {isLoading ? (
@@ -175,7 +345,7 @@ function ParticipantsContent() {
                         ) : (
                             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                                 {participants.map((participant) => (
-                                    <div key={participant.id} className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
+                                    <div key={participant.id} className="grid grid-cols-15 gap-4 px-6 py-4 items-center">
                                         <div className="col-span-4">
                                             <div className="text-sm font-semibold text-black dark:text-white">
                                                 {participant.nom_complet || [participant.prenom, participant.nom].filter(Boolean).join(" ")}
@@ -190,7 +360,7 @@ function ParticipantsContent() {
                                         <div className="col-span-3 text-sm text-zinc-600 dark:text-zinc-400">
                                             {participant.email || "-"}
                                         </div>
-                                        <div className="col-span-2 flex justify-end">
+                                        <div className="col-span-2 flex justify-center">
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleActive(participant)}
@@ -204,12 +374,131 @@ function ParticipantsContent() {
                                                 />
                                             </button>
                                         </div>
+                                        <div className="col-span-3 flex justify-center gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    handleDeleteParticipant(participant.id);
+                                                }}
+                                                className="inline-flex items-center rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                            >
+                                                Supprimer
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    openEditModal(participant);
+                                                }}
+                                                className="inline-flex items-center rounded-lg bg-zinc-900 px-5 py-2 text-sm font-semibold text-white hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-white"
+                                            >
+                                                Modifier
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
                 </div>
+                {isEditOpen && editingParticipant && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                        onClick={closeEditModal}
+                        role="presentation"
+                    >
+                        <div className="w-full max-w-xl rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl">
+                            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-black dark:text-white">
+                                        Modifier un participant
+                                    </h2>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        ID #{editingParticipant.id}
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={closeEditModal}
+                                    className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="px-6 py-5 space-y-4" onClick={(event) => event.stopPropagation()} role="presentation">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-black dark:text-white">
+                                        Nom complet
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editNomComplet}
+                                        onChange={(e) => setEditNomComplet(e.target.value)}
+                                        className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-black dark:text-white">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={editEmail}
+                                            onChange={(e) => {
+                                                setEditEmail(e.target.value);
+                                                setEditEmailError(validateEmail(e.target.value));
+                                            }}
+                                            className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white ${editEmailError
+                                                ? "border-red-400 focus:ring-2 focus:ring-red-500"
+                                                : "border-zinc-300 dark:border-zinc-700"
+                                                }`}
+                                        />
+                                        {editEmailError && (
+                                            <p className="text-xs text-red-500">{editEmailError}</p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-black dark:text-white">
+                                            Profession
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editProfession}
+                                            onChange={(e) => setEditProfession(e.target.value)}
+                                            className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-black dark:text-white">
+                                        Entreprise
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editEntreprise}
+                                        onChange={(e) => setEditEntreprise(e.target.value)}
+                                        className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800 px-6 py-4" onClick={(event) => event.stopPropagation()} role="presentation">
+                                <button
+                                    type="button"
+                                    onClick={closeEditModal}
+                                    className="px-4 py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={saveParticipantEdit}
+                                    disabled={isSavingId === editingParticipant.id || !hasEdits || !!editEmailError}
+                                    className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold"
+                                >
+                                    {isSavingId === editingParticipant.id ? "Enregistrement..." : "Enregistrer"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );
