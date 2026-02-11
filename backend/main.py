@@ -49,7 +49,7 @@ class CoreConfig(BaseModel):
     time_per_round: int = 0
 
 @app.post("/core")
-def core_route(config: CoreConfig, db: Session = Depends(get_db)): # N'OUBLIES PAS L'AUTHENTIFICATION ADMIN
+def core_route(config: CoreConfig, db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)): # N'OUBLIES PAS L'AUTHENTIFICATION ADMIN
     """
     Génère une session avec les participants importés du fichier Excel.
     Route protégée - nécessite l'authentification admin.

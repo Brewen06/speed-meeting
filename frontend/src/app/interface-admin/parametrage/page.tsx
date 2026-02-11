@@ -2,8 +2,112 @@
 
 import Image from "next/image";
 import { AdminProtected } from "@/lib/protected-routes";
+import { API_BASE_URL } from "@/lib/api";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function ParametrageContent() {
+  const router = useRouter();
+  const [tableCountLabel, setTableCountLabel] = useState("");
+  const [sessionDurationLabel, setSessionDurationLabel] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [participantCount, setParticipantCount] = useState(0);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadSuccess(false);
+      setParticipantCount(0);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      setError("Veuillez sélectionner un fichier.");
+      return;
+    }
+
+    setError("");
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      // Récupérer le token admin depuis localStorage
+      const token = localStorage.getItem("token");
+      const credentials = btoa("admin:5Pid6M3f!nG"); // Base64 encode
+
+      const response = await fetch(`${API_BASE_URL}/api/participants/upload`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${credentials}`,
+        },
+        body: formData,
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setError(payload?.detail ?? "Upload impossible.");
+        setIsUploading(false);
+        return;
+      }
+
+      setUploadSuccess(true);
+      setParticipantCount(payload.participants_added || 0);
+      setIsUploading(false);
+    } catch {
+      setError("Erreur réseau lors de l'upload. Veuillez réessayer.");
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!uploadSuccess) {
+      setError("Veuillez d'abord importer le fichier de participants.");
+      return;
+    }
+
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tableCountLabel: parseInt(tableCountLabel),
+          sessionDurationLabel: parseInt(sessionDurationLabel),
+          time_per_round: 0,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setError(payload?.detail ?? "Génération impossible.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Rediriger vers la page d'analyse après succès
+      router.push("/interface-admin/analyse");
+    } catch {
+      setError("Erreur réseau. Veuillez réessayer.");
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
       <main className="mx-auto flex w-full max-w-2xl flex-col items-center justify-start py-12 px-6 sm:py-20">
@@ -16,54 +120,140 @@ function ParametrageContent() {
             détermine le nombre de personnes à placer sur une table en un tour.
           </p>
 
-          <form className="space-y-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
+          {uploadSuccess && (
+            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-sm text-green-600 dark:text-green-400">
+                ✓ {participantCount} participant{participantCount > 1 ? "s" : ""} importé{participantCount > 1 ? "s" : ""} avec succès !
+              </p>
+            </div>
+          )}
+
+          {/* Section d'import de fichier */}
+          <div className="mb-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
+              1. Importer la liste des participants
+            </h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+              Téléchargez un fichier Excel (.xlsx, .xls) ou CSV contenant les participants.
+            </p>
+
+            <div className="space-y-4">
+              <div className="flex flex-col">
+                <label htmlFor="participantFile" className="text-sm font-semibold text-black dark:text-white mb-2">
+                  Fichier de participants
+                </label>
+                <input
+                  id="participantFile"
+                  type="file"
+                  accept=".xlsx, .csv, .xls"
+                  onChange={handleFileChange}
+                  className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-400"
+                  disabled={isUploading || isLoading}
+                />
+              </div>
+
+              {selectedFile && (
+                <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                    📄 {selectedFile.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleFileUpload}
+                    disabled={isUploading || uploadSuccess}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+                  >
+                    {isUploading ? "Importation..." : uploadSuccess ? "✓ Importé" : "Importer"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
+              2. Configurer la session
+            </h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex flex-col">
-                <label htmlFor="participantCount" className="text-sm font-semibold text-black dark:text-white mb-2">
+                <label htmlFor="participantCountDisplay" className="text-sm font-semibold text-black dark:text-white mb-2">
                   Nombre de participants
                 </label>
-                <input id="participantCount" type="number" className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required placeholder="Ex: 20" />
+                <input
+                  id="participantCountDisplay"
+                  type="text"
+                  className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white"
+                  disabled
+                  value={uploadSuccess ? `${participantCount} participant${participantCount > 1 ? "s" : ""}` : "Importez d'abord un fichier"}
+                />
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="tableCount" className="text-sm font-semibold text-black dark:text-white mb-2" >
+                <label htmlFor="tableCountLabel" className="text-sm font-semibold text-black dark:text-white mb-2" >
                   Nombre de tables
                 </label>
-                <input id="tableCount" type="number" className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required placeholder="Ex: 5" />
+                <input
+                  id="tableCountLabel"
+                  type="number"
+                  className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  required
+                  placeholder="Ex: 5"
+                  value={tableCountLabel}
+                  onChange={(e) => setTableCountLabel(e.target.value)}
+                  min="1"
+                />
               </div>
             </div>
 
             <div className="flex flex-col">
-              <label htmlFor="sessionDuration" className="text-sm font-semibold text-black dark:text-white mb-2" >
+              <label htmlFor="sessionDurationLabel" className="text-sm font-semibold text-black dark:text-white mb-2" >
                 Durée de la session (en minutes)
               </label>
-              <input id="sessionDuration" type="number" className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required placeholder="Ex: 60" />
+              <input
+                id="sessionDurationLabel"
+                type="number"
+                className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                required
+                placeholder="Ex: 60"
+                value={sessionDurationLabel}
+                onChange={(e) => setSessionDurationLabel(e.target.value)}
+                min="1"
+              />
             </div>
 
-            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6">
-              <p className="text-sm font-semibold text-black dark:text-white mb-4">
-                Plan de la salle
-              </p>
-              <label htmlFor="roomPlan" className="flex flex-col items-center justify-center w-full px-6 py-8 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
-                <svg className="w-8 h-8 text-zinc-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                  Cliquez pour télécharger une image
-                </span>
-              </label>
-              <input type="file" id="roomPlan" accept="image/*" className="hidden" required />
 
-              <div id="imagePreview" className="mt-6 w-full">
-                <Image id="uploadedImage" src="" alt="Plan de la salle" width={400} height={300} className="hidden w-full rounded-lg shadow-sm" />
-              </div>
-            </div>
 
             <div className="flex gap-4 pt-6">
-              <button type="submit" formAction="/interface-admin/analyse" className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm" >
-                Analyser le plan
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors shadow-sm"
+              >
+                {isLoading ? "Génération en cours..." : "Générer la session"}
               </button>
-              <button type="reset" className="flex-1 px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-semibold rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors" >
+              <button
+                type="button"
+                onClick={() => {
+                  setTableCountLabel("");
+                  setSessionDurationLabel("");
+                  setError("");
+                  setSelectedFile(null);
+                  setUploadSuccess(false);
+                  setParticipantCount(0);
+                  // Réinitialiser l'input file
+                  const fileInput = document.getElementById("participantFile") as HTMLInputElement;
+                  if (fileInput) fileInput.value = "";
+                }}
+                disabled={isLoading}
+                className="flex-1 px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-semibold rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Réinitialiser
               </button>
             </div>

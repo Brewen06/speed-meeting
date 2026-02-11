@@ -13,10 +13,10 @@ router = APIRouter()
 @router.post("/participants/upload")
 async def upload_participants(
     file: UploadFile = File(...), 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)
 ):
     if not file.filename.endswith(('.csv', '.xlsx', '.xls')):
-        raise HTTPException(status_code=400, detail="Format de fichier non supporté (CSV ou XLSX uniquement)")
+        raise HTTPException(status_code=400, detail="Format de fichier non supporté (CSV, XLSX ou XLS uniquement)")
 
     try:
         contents = await file.read()
@@ -177,7 +177,7 @@ def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db
     return new_p
 
 @router.delete("/participants/delete") # suppression d'un participant spécifique
-def delete_participant(participant_id: int, db: Session = Depends(get_db)):
+def delete_participant(participant_id: int, db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)  ):
     participant = db.query(Participant).filter(Participant.id == participant_id).first()
     if not participant:
         raise HTTPException(status_code=404, detail="Participant non trouvé")
@@ -188,7 +188,7 @@ def delete_participant(participant_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/participants/clear")
-def clear_participants(db: Session = Depends(get_db)): #N'OUBLIES PAS L'AUTHENTIFICATION ADMIN !!!!!!!!!!!!!!!
+def clear_participants(db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)): #N'OUBLIES PAS L'AUTHENTIFICATION ADMIN !!!!!!!!!!!!!!!
     db.query(Participant).delete()
     db.commit()
     return {"message": "Nettoyage effectué"}

@@ -60,7 +60,7 @@ export default function Header() {
             )}
             {isAdmin && (
               <a href="/interface-admin" className="hover:text-blue-400 transition-colors">
-                Page d'administration
+                Page de l'organisateur
               </a>
             )}
             {isConnected !== null && (
@@ -78,7 +78,7 @@ export default function Header() {
                 )}
                 {!isConnected && (
                   <a href="/authentification/admin" className="text-sm px-3 py-1 rounded-full bg-orange-600 hover:bg-orange-700 transition-colors">
-                    Admin
+                    Organisateur
                   </a>
                 )}
               </div>
