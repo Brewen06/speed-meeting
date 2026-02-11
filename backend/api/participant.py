@@ -140,7 +140,9 @@ class ParticipantActiveUpdate(BaseModel):
     is_active: bool
 
 class ParticipantLogin(BaseModel):
-    nom_complet: str
+    nom: str | None = None
+    prenom: str | None = None
+    nom_complet: str | None = None
     email: str | None = None
 
 @router.get("/participants")
@@ -150,14 +152,38 @@ def get_all_participants(db: Session = Depends(get_db)):
 
 @router.post("/participants/login")
 def login_participant(payload: ParticipantLogin, db: Session = Depends(get_db)):
-    nom_complet = (payload.nom_complet or "").strip()
+    # Construire nom_complet si nom/prenom sont fournis
+    if payload.nom_complet:
+        nom_complet = payload.nom_complet.strip()
+    elif payload.nom or payload.prenom:
+        parts = []
+        if payload.prenom:
+            parts.append(payload.prenom.strip())
+        if payload.nom:
+            parts.append(payload.nom.strip())
+        nom_complet = " ".join(parts)
+    else:
+        nom_complet = ""
+    
     email = (payload.email or "").strip() or None
 
-    if not nom_complet:
-        raise HTTPException(status_code=400, detail="Nom Complet requis")
+    if not nom_complet and not email:
+        raise HTTPException(status_code=400, detail="Nom ou email requis")
 
-    query = db.query(Participant).filter(Participant.nom_complet.ilike(nom_complet))
-    if email:
+    # Rechercher par nom_complet et/ou email
+    query = db.query(Participant)
+    
+    if nom_complet and email:
+        # Si les deux sont fournis, chercher avec les deux
+        query = query.filter(
+            Participant.nom_complet.ilike(nom_complet),
+            Participant.email.ilike(email)
+        )
+    elif nom_complet:
+        # Chercher uniquement par nom_complet
+        query = query.filter(Participant.nom_complet.ilike(nom_complet))
+    elif email:
+        # Chercher uniquement par email
         query = query.filter(Participant.email.ilike(email))
 
     participant = query.first()

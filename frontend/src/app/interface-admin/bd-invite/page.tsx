@@ -345,6 +345,11 @@ function ParticipantsContent() {
         <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
             <main className="mx-auto flex w-full max-w-7xl flex-col items-center justify-start py-12 px-6 sm:py-20">
                 <div className="w-full space-y-8">
+                    <div>
+                        <a href="/interface-admin/" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            Retour
+                        </a>
+                    </div>
                     <div className="space-y-3">
                         <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
                             Consultation des participants
