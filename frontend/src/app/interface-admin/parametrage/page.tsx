@@ -100,6 +100,9 @@ function ParametrageContent() {
         return;
       }
 
+      // Sauvegarder les résultats de la session dans localStorage
+      localStorage.setItem("sessionResults", JSON.stringify(payload));
+
       // Rediriger vers la page d'analyse après succès
       router.push("/interface-admin/analyse");
     } catch {
