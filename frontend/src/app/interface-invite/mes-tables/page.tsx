@@ -23,6 +23,7 @@ function MesTables() {
   const [error, setError] = useState("");
   const [isWaiting, setIsWaiting] = useState(false);
   const [retryTick, setRetryTick] = useState(0);
+  const [currentRotationIndex, setCurrentRotationIndex] = useState(0);
 
   useEffect(() => {
     let isActive = true;
@@ -185,27 +186,65 @@ function MesTables() {
               </div>
 
               {itinerary.itinerary.length > 0 ? (
-                <div className="grid gap-4">
-                  {itinerary.itinerary.map((item) => (
-                    <div
-                      key={item.rotation}
-                      className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-xl font-semibold text-black dark:text-white">
-                            Rotation {item.rotation}
-                          </h3>
-                          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                            {item.table_name}
-                          </p>
-                        </div>
-                        <div className="text-4xl font-bold text-zinc-200 dark:text-zinc-800">
-                          {item.rotation}
-                        </div>
+                <div className="space-y-6">
+                  {/* Navigation avec numéros de rotation */}
+                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                    {itinerary.itinerary.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentRotationIndex(index)}
+                        className={`w-10 h-10 rounded-lg font-semibold transition-all ${currentRotationIndex === index
+                            ? "bg-blue-600 text-white shadow-md scale-110"
+                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                          }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Affichage de la rotation actuelle */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-2xl p-8 shadow-lg">
+                    <div className="text-center space-y-6">
+                      <div>
+                        <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">
+                          Rotation {itinerary.itinerary[currentRotationIndex].rotation}
+                        </p>
+                        <h3 className="text-5xl font-bold text-blue-700 dark:text-blue-300">
+                          {itinerary.itinerary[currentRotationIndex].table_name}
+                        </h3>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Boutons de navigation avec flèches */}
+                  <div className="flex items-center justify-between gap-4">
+                    <button
+                      onClick={() => setCurrentRotationIndex(Math.max(0, currentRotationIndex - 1))}
+                      disabled={currentRotationIndex === 0}
+                      className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Précédent
+                    </button>
+
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+                      {currentRotationIndex + 1} / {itinerary.total_rotations}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentRotationIndex(Math.min(itinerary.itinerary.length - 1, currentRotationIndex + 1))}
+                      disabled={currentRotationIndex === itinerary.itinerary.length - 1}
+                      className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                    >
+                      Suivant
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-8 text-center">

@@ -26,7 +26,7 @@ export default function Header() {
 
   const navLinks = [
     { href: "/", label: "Accueil", show: true },
-    { href: "/interface-invite/attente", label: "Mon interface", show: isConnected },
+    { href: "/interface-invite", label: "Mon interface", show: isConnected },
     { href: "/interface-admin", label: "Page de l'organisateur", show: isAdmin }
   ].filter(link => link.show);
 

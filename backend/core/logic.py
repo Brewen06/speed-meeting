@@ -52,7 +52,7 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
         effective_time_per_round = time_per_round
         max_rounds_by_time = sessionDurationLabel // effective_time_per_round
     else:
-        max_rounds_by_time = min(max_theoretical_rounds, max(1, sessionDurationLabel // 5))
+        max_rounds_by_time = min(max_theoretical_rounds, max(1, sessionDurationLabel // 10))
         effective_time_per_round = sessionDurationLabel // max_rounds_by_time if max_rounds_by_time > 0 else sessionDurationLabel
     
     num_rounds = max(1, min(max_rounds_by_time, max_theoretical_rounds))
