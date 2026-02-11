@@ -11,19 +11,7 @@ function ParticipantContent() {
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             Page d'invité
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Veuillez patientez pendant que l'organisateur configure la session... <br></br>
-            Cela déterminera les numéros de vos tables lors de la session.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4">
-            <div className="flex gap-2">
-              <div className="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
-              <div className="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-              <div className="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-            </div>
-            { }
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Chargement en cours...</p>
-          </div>
+          <a href="/interface-invite/mes-tables">Accéder aux tables qui vous sont assignées</a>
         </div>
       </main>
     </div>

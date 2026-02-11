@@ -35,7 +35,7 @@ function AnalyseContent() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Simuler une "analyse" pendant 2 secondes puis afficher les résultats
+    // Simuler une "analyse" pendant quelques secondes puis afficher les résultats
     const timer = setTimeout(() => {
       const savedResults = localStorage.getItem("sessionResults");
 

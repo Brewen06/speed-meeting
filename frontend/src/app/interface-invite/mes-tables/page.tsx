@@ -21,50 +21,98 @@ function MesTables() {
   const [itinerary, setItinerary] = useState<ItineraryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
-    const fetchItinerary = async () => {
+    let isActive = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const updateState = (updater: () => void) => {
+      if (!isActive) return;
+      updater();
+    };
+
+    const fetchItinerary = async (participantName: string) => {
       try {
-        // Récupérer les données du participant depuis localStorage
-        const participantData = localStorage.getItem("participant");
-        if (!participantData) {
-          setError("Participant non trouvé. Veuillez vous reconnecter.");
-          setIsLoading(false);
-          return;
-        }
-
-        const participant = JSON.parse(participantData);
-        const participantName = participant.nom_complet;
-
-        if (!participantName) {
-          setError("Nom du participant non disponible.");
-          setIsLoading(false);
-          return;
-        }
-
-        // Appeler l'API pour obtenir l'itinéraire
         const response = await fetch(
           `${API_BASE_URL}/api/participants/name/${encodeURIComponent(participantName)}/itinerary`
         );
 
-        const payload = await response.json();
+        const payload = await response.json().catch(() => null);
 
         if (!response.ok) {
-          setError(payload?.detail ?? "Impossible de récupérer l'itinéraire.");
-          setIsLoading(false);
+          const detail = payload?.detail ?? "";
+          if (response.status === 404 && detail.includes("Aucune session")) {
+            updateState(() => {
+              setIsWaiting(true);
+              setError("");
+              setIsLoading(false);
+            });
+            return;
+          }
+
+          updateState(() => {
+            setError(payload?.detail ?? "Impossible de récupérer l'itinéraire.");
+            setIsLoading(false);
+            setIsWaiting(false);
+          });
           return;
         }
 
-        setItinerary(payload);
-        setIsLoading(false);
+        updateState(() => {
+          setItinerary(payload);
+          setIsLoading(false);
+          setIsWaiting(false);
+          setError("");
+        });
       } catch {
-        setError("Erreur réseau. Veuillez réessayer.");
-        setIsLoading(false);
+        updateState(() => {
+          setError("Erreur réseau. Veuillez réessayer.");
+          setIsLoading(false);
+          setIsWaiting(false);
+        });
       }
     };
 
-    fetchItinerary();
-  }, []);
+    const startPolling = (participantName: string) => {
+      fetchItinerary(participantName);
+      intervalId = setInterval(() => fetchItinerary(participantName), 5000);
+    };
+
+    const init = () => {
+      setIsLoading(true);
+      setError("");
+      setIsWaiting(false);
+
+      const participantData = localStorage.getItem("participant");
+      if (!participantData) {
+        setError("Participant non trouvé. Veuillez vous reconnecter.");
+        setIsLoading(false);
+        return;
+      }
+
+      const participant = JSON.parse(participantData);
+      const participantName = participant.nom_complet;
+
+      if (!participantName) {
+        setError("Nom du participant non disponible.");
+        setIsLoading(false);
+        return;
+      }
+
+      startPolling(participantName);
+    };
+
+    init();
+
+    return () => {
+      isActive = false;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [retryTick]);
 
   if (isLoading) {
     return (
@@ -92,9 +140,36 @@ function MesTables() {
             Consultez vos tables assignées pour chaque rotation.
           </p>
 
+          {isWaiting && !itinerary && !error && (
+            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                    En attente du lancement de la session par l'organisateur...
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    La page se mettra a jour automatiquement.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <button
+                type="button"
+                onClick={() => setRetryTick((value) => value + 1)}
+                className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                Reessayer
+              </button>
             </div>
           )}
 
