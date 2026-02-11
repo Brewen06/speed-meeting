@@ -32,6 +32,7 @@ function ParticipantsContent() {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const [participantCount, setParticipantCount] = useState(0);
+    const [participantUpdated, setParticipantUpdated] = useState(0);
 
     const adminAuthHeader = useMemo(() => {
         const credentials = btoa("admin:5Pid6M3f!nG");
@@ -291,6 +292,7 @@ function ParticipantsContent() {
             setSelectedFile(file);
             setUploadSuccess(false);
             setParticipantCount(0);
+            setParticipantUpdated(0);
         }
     };
     const handleFileUpload = async () => {
@@ -328,6 +330,7 @@ function ParticipantsContent() {
 
             setUploadSuccess(true);
             setParticipantCount(payload.participants_added || 0);
+            setParticipantUpdated(payload.participants_updated || 0);
             setIsUploading(false);
 
             // Recharger automatiquement la liste des participants
@@ -390,6 +393,14 @@ function ParticipantsContent() {
                             )}
                         </div>
                     </div>
+                    {uploadSuccess && (participantCount > 0 || participantUpdated > 0) && (
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <p className="text-sm text-green-600 dark:text-green-400">
+                                ✓ Import réussi : {participantCount} participant{participantCount > 1 ? 's ajoutés' : ' ajouté'}
+                                {participantUpdated > 0 && `, ${participantUpdated} mis à jour`}
+                            </p>
+                        </div>
+                    )}
                     {error && (
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>

@@ -66,24 +66,56 @@ async def upload_participants(
         if not participants_rows:
             return {"message": "Aucun nom trouvé dans le fichier."}
 
-        new_participants = [
-            Participant(
-                nom=row["nom"],
-                prenom=row["prenom"],
-                nom_complet=row["nom_complet"],
-                email=row["email"],
-                profession=row["profession"],
-                entreprise=row["entreprise"],
-                is_active=True
-            )
-            for row in participants_rows
-        ]
-        db.bulk_save_objects(new_participants)
+        added_count = 0
+        updated_count = 0
+        skipped_count = 0
+
+        for row in participants_rows:
+            # Vérifier si le participant existe déjà par email ou nom_complet
+            existing = None
+            if row["email"]:
+                existing = db.query(Participant).filter(Participant.email == row["email"]).first()
+            
+            if not existing and row["nom_complet"]:
+                existing = db.query(Participant).filter(Participant.nom_complet == row["nom_complet"]).first()
+            
+            if existing:
+                # Mettre à jour les informations du participant existant
+                if row["nom"]:
+                    existing.nom = row["nom"]
+                if row["prenom"]:
+                    existing.prenom = row["prenom"]
+                if row["nom_complet"]:
+                    existing.nom_complet = row["nom_complet"]
+                if row["email"]:
+                    existing.email = row["email"]
+                if row["profession"]:
+                    existing.profession = row["profession"]
+                if row["entreprise"]:
+                    existing.entreprise = row["entreprise"]
+                # Réactiver le participant s'il était désactivé
+                existing.is_active = True
+                updated_count += 1
+            else:
+                # Ajouter un nouveau participant
+                new_participant = Participant(
+                    nom=row["nom"],
+                    prenom=row["prenom"],
+                    nom_complet=row["nom_complet"],
+                    email=row["email"],
+                    profession=row["profession"],
+                    entreprise=row["entreprise"],
+                    is_active=True
+                )
+                db.add(new_participant)
+                added_count += 1
+        
         db.commit()
 
         return {
             "filename": file.filename,
-            "participants_added": len(participants_rows),
+            "participants_added": added_count,
+            "participants_updated": updated_count,
             "sample": [row["nom_complet"] for row in participants_rows[:5]]
         }
 
