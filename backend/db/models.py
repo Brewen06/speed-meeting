@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base
 import datetime
@@ -12,6 +12,7 @@ class Participant(Base):
     email = Column(String, nullable=True)
     profession = Column(String, nullable=True)
     entreprise = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
     affectations = relationship("ParticipantTableAssignment", back_populates="participant")
 
 class Table(Base):

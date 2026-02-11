@@ -6,7 +6,8 @@ import { API_BASE_URL } from "@/lib/api";
 
 export default function Connexion() {
     const router = useRouter();
-    const [nomComplet, setNomComplet] = useState("");
+    const [nom, setNom] = useState("");
+    const [prenom, setPrenom] = useState("");
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +24,8 @@ export default function Connexion() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    nom_complet: nomComplet.trim(),
+                    nom: nom.trim(),
+                    prenom: prenom.trim() || undefined,
                     email: email.trim() || undefined,
                 }),
             });
@@ -63,7 +65,7 @@ export default function Connexion() {
                             Retrouver vos tables en quelques secondes.
                         </h1>
                         <p className="max-w-xl text-base text-slate-600 md:text-lg">
-                            Connectez-vous avec votre nom complet pour acceder a votre espace
+                            Connectez-vous avec votre nom et prénom pour acceder a votre espace
                             invite. Votre email permet de securiser la recherche si besoin.
                         </p>
                         <div className="flex flex-wrap gap-4">
@@ -94,26 +96,39 @@ export default function Connexion() {
                         </div>
 
                         <form className="space-y-5" onSubmit={handleSubmit}>
-                            <label className="block text-sm font-semibold text-slate-700">
-                                Nom complet
-                                <input
-                                    type="text"
-                                    value={nomComplet}
-                                    onChange={(event) => setNomComplet(event.target.value)}
-                                    placeholder="Ex: Clara Dupont"
-                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#ff8f6b] focus:outline-none focus:ring-2 focus:ring-[#ff8f6b]/40"
-                                    required
-                                />
-                            </label>
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <label className="block text-sm font-semibold text-slate-700">
+                                    Nom
+                                    <input
+                                        type="text"
+                                        value={nom}
+                                        onChange={(event) => setNom(event.target.value)}
+                                        placeholder="Ex: Dupont"
+                                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#ff8f6b] focus:outline-none focus:ring-2 focus:ring-[#ff8f6b]/40"
+                                        required
+                                    />
+                                </label>
 
+                                <label className="block text-sm font-semibold text-slate-700">
+                                    Prénom
+                                    <input
+                                        type="text"
+                                        value={prenom}
+                                        onChange={(event) => setPrenom(event.target.value)}
+                                        placeholder="Ex: Clara"
+                                        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#4cc9a6] focus:outline-none focus:ring-2 focus:ring-[#4cc9a6]/40"
+                                    />
+                                </label>
+                            </div>
                             <label className="block text-sm font-semibold text-slate-700">
-                                Email (optionnel)
+                                Email
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
-                                    placeholder="prenom.nom@email.com"
+                                    placeholder=""
                                     className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#4cc9a6] focus:outline-none focus:ring-2 focus:ring-[#4cc9a6]/40"
+
                                 />
                             </label>
 
@@ -136,7 +151,6 @@ export default function Connexion() {
                             <a href="/" className="transition hover:text-slate-800">
                                 Retour a l'accueil
                             </a>
-                            <span>Besoin d'aide ? Contactez l'organisateur.</span>
                         </div>
                     </div>
                 </section>

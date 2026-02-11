@@ -73,7 +73,8 @@ async def upload_participants(
                 nom_complet=row["nom_complet"],
                 email=row["email"],
                 profession=row["profession"],
-                entreprise=row["entreprise"]
+                entreprise=row["entreprise"],
+                is_active=True
             )
             for row in participants_rows
         ]
@@ -96,6 +97,9 @@ class ParticipantCreate(BaseModel):
     prenom: str | None = None
     nom_complet: str | None = None
     email: str | None = None
+
+class ParticipantActiveUpdate(BaseModel):
+    is_active: bool
 
 class ParticipantLogin(BaseModel):
     nom_complet: str
@@ -170,11 +174,32 @@ def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db
     if not nom_complet:
         raise HTTPException(status_code=400, detail="Nom Complet requis")
 
-    new_p = Participant(nom=nom, prenom=prenom, nom_complet=nom_complet, email=email)
+    new_p = Participant(nom=nom, prenom=prenom, nom_complet=nom_complet, email=email, is_active=True)
     db.add(new_p)
     db.commit()
     db.refresh(new_p)
     return new_p
+
+@router.patch("/participants/{participant_id}/active")
+def update_participant_active(
+    participant_id: int,
+    payload: ParticipantActiveUpdate,
+    db: Session = Depends(get_db),
+    current_admin: Participant = Depends(get_current_admin)
+):
+    participant = db.query(Participant).filter(Participant.id == participant_id).first()
+    if not participant:
+        raise HTTPException(status_code=404, detail="Participant non trouvé")
+
+    participant.is_active = payload.is_active
+    db.commit()
+    db.refresh(participant)
+
+    return {
+        "id": participant.id,
+        "nom_complet": participant.nom_complet,
+        "is_active": participant.is_active
+    }
 
 @router.delete("/participants/delete") # suppression d'un participant spécifique
 def delete_participant(participant_id: int, db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)  ):
