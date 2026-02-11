@@ -28,6 +28,10 @@ function ParticipantsContent() {
     const [editProfession, setEditProfession] = useState("");
     const [editEntreprise, setEditEntreprise] = useState("");
     const [editEmailError, setEditEmailError] = useState("");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [participantCount, setParticipantCount] = useState(0);
 
     const adminAuthHeader = useMemo(() => {
         const credentials = btoa("admin:5Pid6M3f!nG");
@@ -281,19 +285,111 @@ function ParticipantsContent() {
         }
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedFile(file);
+            setUploadSuccess(false);
+            setParticipantCount(0);
+        }
+    };
+    const handleFileUpload = async () => {
+        if (!selectedFile) {
+            setError("Veuillez sélectionner un fichier.");
+            return;
+        }
+
+        setError("");
+        setIsUploading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+
+            // Récupérer le token admin depuis localStorage
+            const token = localStorage.getItem("token");
+            const credentials = btoa("admin:5Pid6M3f!nG"); // Base64 encode
+
+            const response = await fetch(`${API_BASE_URL}/api/participants/upload`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Basic ${credentials}`,
+                },
+                body: formData,
+            });
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                setError(payload?.detail ?? "Upload impossible.");
+                setIsUploading(false);
+                return;
+            }
+
+            setUploadSuccess(true);
+            setParticipantCount(payload.participants_added || 0);
+            setIsUploading(false);
+
+            // Recharger automatiquement la liste des participants
+            await loadParticipants("");
+        } catch {
+            setError("Erreur réseau lors de l'upload. Veuillez réessayer.");
+            setIsUploading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
             <main className="mx-auto flex w-full max-w-7xl flex-col items-center justify-start py-12 px-6 sm:py-20">
                 <div className="w-full space-y-8">
                     <div className="space-y-3">
                         <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
-                            Base de donnees des participants
+                            Consultation des participants
                         </h1>
                         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-3xl">
-                            Consultez, recherchez et activez ou desactivez les participants. Les invites desactives ne seront pas pris en compte lors du lancement de la session.
+                            Consultez, recherchez et activez ou desactivez les participants. Les invites desactives ne seront pas pris en compte lors du lancement de la session. Vous pouvez egalement supprimer ou modifier des participants ou vider la liste complete.
                         </p>
                     </div>
+                    <div className="mb-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
+                        <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
+                            Importer une liste contenant des participants
+                        </h2>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+                            Importez un fichier Excel (.xlsx, .xls) ou CSV contenant les participants.
+                        </p>
 
+                        <div className="space-y-4">
+                            <div className="flex flex-col">
+                                <label htmlFor="participantFile" className="text-sm font-semibold text-black dark:text-white mb-2">
+                                    Fichier de participants
+                                </label>
+                                <input
+                                    id="participantFile"
+                                    type="file"
+                                    accept=".xlsx, .csv, .xls"
+                                    onChange={handleFileChange}
+                                    className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-400"
+                                    disabled={isUploading || isLoading}
+                                />
+                            </div>
+
+                            {selectedFile && (
+                                <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+                                    <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                                        📄 {selectedFile.name}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={handleFileUpload}
+                                        disabled={isUploading || uploadSuccess}
+                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors"
+                                    >
+                                        {isUploading ? "Importation..." : uploadSuccess ? "✓ Importé" : "Importer"}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     {error && (
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
