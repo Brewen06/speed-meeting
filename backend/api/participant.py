@@ -35,7 +35,7 @@ async def upload_participants(
         col_nom = get_column("nom", "Nom", "NOM", "last name", "Last name", "Last Name", "lastname", "Lastname", "LASTNAME", "LAST NAME")
         col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
         col_nom_complet = get_column("nom complet", "Nom Complet", "Nom complet", "full name", "Full name", "Full Name", "fullname", "Fullname", "FULLNAME", "FULL NAME")
-        col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL")
+        col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL", "courriel", "Courriel", "COURRIEL", "adresse email", "Adresse email", "Adresse Email", "ADRESSE EMAIL", "adresse e-mail", "Adresse e-mail", "Adresse E-mail", "ADRESSE E-MAIL")
         col_profession = get_column("poste", "Poste", "POSTE", "profession", "Profession", "PROFESSION", "job title", "Job title", "JOB TITLE", "job", "Job", "JOB")
         col_entreprise = get_column("société", "Société", "SOCIÉTÉ", "entreprise", "Entreprise", "ENTREPRISE", "company", "Company", "COMPANY", "organization", "Organization", "ORGANIZATION", "organisation", "Organisation", "ORGANISATION")
 
