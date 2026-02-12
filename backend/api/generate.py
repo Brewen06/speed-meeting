@@ -16,12 +16,12 @@ class SessionConfig(BaseModel):
 @router.post("/generate")
 def create_session(config: SessionConfig, db: Session = Depends(get_db)):
     
-    db_participants = db.query(Participant).all()
+    db_participants = db.query(Participant).filter(Participant.is_active.is_(True)).all()
     participant_names = list(set([p.nom_complet for p in db_participants if p.nom_complet]))
     
 
     if not participant_names:
-        raise HTTPException(status_code=400, detail="La liste des participants est vide. Importez un fichier d'abord !")
+        raise HTTPException(status_code=400, detail="Aucun participant actif. Activez ou importez des participants d'abord !")
 
     # Appeler la core route pour générer les rounds
     result = generate_rounds(

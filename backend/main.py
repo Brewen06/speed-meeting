@@ -55,11 +55,11 @@ def core_route(config: CoreConfig, db: Session = Depends(get_db), current_admin:
     Route protégée - nécessite l'authentification admin.
     """
     # Récupérer les participants de la base de données
-    db_participants = db.query(Participant).all()
+    db_participants = db.query(Participant).filter(Participant.is_active.is_(True)).all()
     participant_names = [p.nom_complet for p in db_participants if p.nom_complet]
 
     if not participant_names:
-        raise HTTPException(status_code=400, detail="La liste des participants est vide. Importez un fichier d'abord !")
+        raise HTTPException(status_code=400, detail="Aucun participant actif. Activez ou importez des participants d'abord !")
 
     # Générer les rounds avec les vrais noms
     result = generate_rounds(

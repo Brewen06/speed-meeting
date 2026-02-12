@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { AdminProtected } from "@/lib/protected-routes";
 import { API_BASE_URL } from "@/lib/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 function ParametrageContent() {
@@ -17,6 +17,9 @@ function ParametrageContent() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [participantCount, setParticipantCount] = useState(0);
+  const [existingParticipantCount, setExistingParticipantCount] = useState(0);
+  const [activeParticipantCount, setActiveParticipantCount] = useState(0);
+  const [isExistingCountLoading, setIsExistingCountLoading] = useState(true);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,6 +29,27 @@ function ParametrageContent() {
       setParticipantCount(0);
     }
   };
+
+  useEffect(() => {
+    const loadExistingParticipants = async () => {
+      setIsExistingCountLoading(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/participants`);
+        const payload = await response.json();
+
+        if (response.ok && Array.isArray(payload)) {
+          setExistingParticipantCount(payload.length);
+          setActiveParticipantCount(payload.filter((participant) => participant?.is_active).length);
+        }
+      } catch {
+        // Ignorer les erreurs reseau, on garde 0 par defaut
+      } finally {
+        setIsExistingCountLoading(false);
+      }
+    };
+
+    loadExistingParticipants();
+  }, []);
 
   const handleFileUpload = async () => {
     if (!selectedFile) {
@@ -72,8 +96,8 @@ function ParametrageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!uploadSuccess) {
-      setError("Veuillez d'abord importer le fichier de participants.");
+    if (!uploadSuccess && existingParticipantCount === 0) {
+      setError("Veuillez importer un fichier ou utiliser les participants déjà présents.");
       return;
     }
 
@@ -138,6 +162,14 @@ function ParametrageContent() {
             </div>
           )}
 
+          {!uploadSuccess && existingParticipantCount > 0 && (
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                {activeParticipantCount} actif{activeParticipantCount > 1 ? "s" : ""} / {existingParticipantCount} total. Import optionnel.
+              </p>
+            </div>
+          )}
+
           {/* Section d'import de fichier */}
           <div className="mb-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
             <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
@@ -195,7 +227,15 @@ function ParametrageContent() {
                   type="text"
                   className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white"
                   disabled
-                  value={uploadSuccess ? `${participantCount} participant${participantCount > 1 ? "s" : ""}` : "Importez d'abord un fichier"}
+                  value={
+                    uploadSuccess
+                      ? `${participantCount} participant${participantCount > 1 ? "s" : ""}`
+                      : isExistingCountLoading
+                        ? "Chargement..."
+                        : existingParticipantCount > 0
+                          ? `${activeParticipantCount} actif${activeParticipantCount > 1 ? "s" : ""} / ${existingParticipantCount} total`
+                          : "Importez d'abord un fichier"
+                  }
                 />
               </div>
 
