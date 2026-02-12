@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { AdminProtected } from "@/lib/protected-routes";
 import { API_BASE_URL } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 function ParametrageContent() {
@@ -31,6 +31,13 @@ function ParametrageContent() {
     message: string;
     onConfirm: () => void;
   }>({ isOpen: false, title: "", message: "", onConfirm: () => { } });
+
+  const adminAuthHeader = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+    return sessionStorage.getItem("adminAuth") ?? "";
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -96,14 +103,10 @@ function ParametrageContent() {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      // Récupérer le token admin depuis localStorage
-      const token = localStorage.getItem("token");
-      const credentials = btoa("admin:5Pid6M3f!nG"); // Base64 encode
-
       const response = await fetch(`${API_BASE_URL}/api/participants/upload`, {
         method: "POST",
         headers: {
-          "Authorization": `Basic ${credentials}`,
+          "Authorization": adminAuthHeader,
         },
         body: formData,
       });

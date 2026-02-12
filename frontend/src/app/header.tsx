@@ -69,15 +69,7 @@ export default function Header() {
           >
             Se déconnecter
           </button>
-        ) : (
-          <a
-            href="/authentification/admin"
-            onClick={() => mobile && setIsMobileMenuOpen(false)}
-            className={`${baseClasses} ${mobile ? 'block' : ''} text-sm px-3 py-2 rounded-full bg-orange-600 hover:bg-orange-700 transition-colors`}
-          >
-            Organisateur
-          </a>
-        )}
+        ) : null}
       </div>
     );
   };

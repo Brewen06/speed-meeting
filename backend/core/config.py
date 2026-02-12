@@ -11,6 +11,9 @@ class Settings:
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super_secret_key_a_changer_en_prod")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    ADMIN_USERNAME: str = os.getenv("ADMIN_USERNAME", "admin")
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "5Pid6M3f!nG")
     
     # CORS - Origines autorisées (séparées par des virgules dans .env)
     CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") else ["*"]

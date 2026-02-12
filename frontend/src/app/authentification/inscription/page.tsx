@@ -143,12 +143,6 @@ export default function Inscription() {
               >
                 Je me connecte
               </a>
-              <a
-                href="/authentification/admin"
-                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-slate-700 underline decoration-[#93c5fd] decoration-2 underline-offset-4 transition hover:text-slate-900"
-              >
-                Acces administrateur
-              </a>
             </div>
           </div>
         </section>

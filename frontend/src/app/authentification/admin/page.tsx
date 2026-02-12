@@ -34,6 +34,7 @@ export default function AdminConnexion() {
 
       localStorage.setItem("token", payload.token);
       localStorage.setItem("role", payload.role);
+      sessionStorage.setItem("adminAuth", `Basic ${credentials}`);
       router.push("/interface-admin");
     } catch {
       setError("Erreur réseau. Veuillez réessayer.");

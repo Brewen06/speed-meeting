@@ -52,8 +52,10 @@ function ParticipantsContent() {
     }>({ isOpen: false, title: "", message: "", onConfirm: () => { } });
 
     const adminAuthHeader = useMemo(() => {
-        const credentials = btoa("admin:5Pid6M3f!nG");
-        return `Basic ${credentials}`;
+        if (typeof window === "undefined") {
+            return "";
+        }
+        return sessionStorage.getItem("adminAuth") ?? "";
     }, []);
 
     const loadParticipants = async (query: string) => {
@@ -466,14 +468,10 @@ function ParticipantsContent() {
             const formData = new FormData();
             formData.append("file", selectedFile);
 
-            // Récupérer le token admin depuis localStorage
-            const token = localStorage.getItem("token");
-            const credentials = btoa("admin:5Pid6M3f!nG"); // Base64 encode
-
             const response = await fetch(`${API_BASE_URL}/api/participants/upload`, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Basic ${credentials}`,
+                    "Authorization": adminAuthHeader,
                 },
                 body: formData,
             });

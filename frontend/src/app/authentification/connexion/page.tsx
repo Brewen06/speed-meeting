@@ -75,12 +75,6 @@ export default function Connexion() {
                             >
                                 Je m'inscris
                             </a>
-                            <a
-                                href="/authentification/admin"
-                                className="inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-slate-700 underline decoration-[#ff8f6b] decoration-2 underline-offset-4 transition hover:text-slate-900"
-                            >
-                                Acces administrateur
-                            </a>
                         </div>
                     </div>
 
