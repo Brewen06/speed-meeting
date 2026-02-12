@@ -35,6 +35,12 @@ function ParticipantsContent() {
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const [participantCount, setParticipantCount] = useState(0);
     const [participantUpdated, setParticipantUpdated] = useState(0);
+    const [confirmModal, setConfirmModal] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({ isOpen: false, title: "", message: "", onConfirm: () => { } });
 
     const adminAuthHeader = useMemo(() => {
         const credentials = btoa("admin:5Pid6M3f!nG");
@@ -133,10 +139,19 @@ function ParticipantsContent() {
     };
 
     const handleDeleteParticipant = async (id: number) => {
-        if (!confirm("Êtes-vous sûr de vouloir supprimer ce participant ?")) {
-            return;
-        }
+        const participant = participants.find(p => p.id === id);
+        setConfirmModal({
+            isOpen: true,
+            title: "Supprimer le participant ?",
+            message: `Êtes-vous sûr de vouloir supprimer ${participant?.nom_complet || 'ce participant'} ? Cette action est irréversible.`,
+            onConfirm: () => {
+                setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: () => { } });
+                proceedDeleteParticipant(id);
+            },
+        });
+    };
 
+    const proceedDeleteParticipant = async (id: number) => {
         setIsSavingId(id);
         setError("");
 
@@ -167,10 +182,18 @@ function ParticipantsContent() {
     };
 
     const handleClear = async () => {
-        if (!confirm("Êtes-vous sûr de vouloir supprimer tous les participants ?")) {
-            return;
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: "Réinitialiser la liste ?",
+            message: `Êtes-vous sûr de vouloir supprimer tous les ${participants.length} participant(s) ? Cette action est irréversible.`,
+            onConfirm: () => {
+                setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: () => { } });
+                proceedClear();
+            },
+        });
+    };
 
+    const proceedClear = async () => {
         setIsLoading(true);
         setError("");
 
@@ -637,10 +660,60 @@ function ParticipantsContent() {
                         </div>
                     </div>
                 )}
-            </main>
+                {/* Modale de confirmation */}
+                {confirmModal.isOpen && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                        onClick={() => setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: () => { } })}
+                        role="presentation"
+                    >
+                        <div
+                            className="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl"
+                            onClick={(e) => e.stopPropagation()}
+                            role="presentation"
+                        >
+                            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
+                                <h2 className="text-lg font-semibold text-black dark:text-white">
+                                    {confirmModal.title}
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: () => { } })}
+                                    className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="px-6 py-5">
+                                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                                    {confirmModal.message}
+                                </p>
+                            </div>
+                            <div className="flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800 px-6 py-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: () => { } })}
+                                    className="px-4 py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={confirmModal.onConfirm}
+                                    className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold"
+                                >
+                                    Confirmer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}            </main>
         </div>
     );
+
 }
+
+
 
 export default function Home() {
     return (

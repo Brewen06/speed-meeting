@@ -34,18 +34,19 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
     if time_per_round > 0 and sessionDurationLabel < time_per_round:
         return {"error": f"Durée de session ({sessionDurationLabel}min) inférieure au temps par round ({time_per_round}min)"}
 
-    total_slots = -(-participant_count // tableCountLabel) * tableCountLabel
-    num_spectres = total_slots - participant_count
+    # Ne plus utiliser de participants fantômes, travailler directement avec les vrais participants
+    participants = participants_reels
     
-    # Ajout des participants "rien" pour équilibrer les tables
-    spectres = [f"rien {i+1}" for i in range(num_spectres)]
-    participants = participants_reels + spectres
+    # Calculer la capacité de base et le nombre de tables avec un participant supplémentaire
+    base_capacity = participant_count // tableCountLabel
+    tables_with_extra = participant_count % tableCountLabel
+    
+    # La capacité max est base_capacity + 1 si nécessaire
+    max_capacity = base_capacity + (1 if tables_with_extra > 0 else 0)
 
-    capacity = len(participants) // tableCountLabel
-
-    #Calcul des limites (inchangé mais basé sur participants totaux)
-    new_meetings_per_round = capacity - 1
-    max_theoretical_rounds = (len(participants) - 1) // new_meetings_per_round if new_meetings_per_round > 0 else 1
+    #Calcul des limites basé sur les vrais participants
+    new_meetings_per_round = max_capacity - 1
+    max_theoretical_rounds = (participant_count - 1) // new_meetings_per_round if new_meetings_per_round > 0 else 1
     
     
     if time_per_round > 0:
@@ -66,24 +67,35 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
         waiting_list = list(participants)
         random.shuffle(waiting_list)
 
-        # Placement des participants dans les tables
+        # Randomiser quelles tables auront un participant supplémentaire à chaque round
+        tables_with_extra_capacity = set(random.sample(range(tableCountLabel), tables_with_extra))
+        
+        # Placement des participants dans les tables avec distribution équilibrée
         for p in waiting_list:
             placed = False
             table_indices = list(range(tableCountLabel))
             random.shuffle(table_indices)
             
+            # Calculer la taille cible pour cette table
+            def get_target_capacity(t_idx):
+                if t_idx in tables_with_extra_capacity:
+                    return base_capacity + 1
+                return base_capacity
+            
             # Tentative de placement sans doublon
             for t_idx in table_indices:
-                if len(tables[t_idx]) < capacity:
+                target_cap = get_target_capacity(t_idx)
+                if len(tables[t_idx]) < target_cap:
                     if not any(other in history[p] for other in tables[t_idx]):
                         tables[t_idx].append(p)
                         placed = True
                         break
             
-            # Placement forcé si nécessaire
+            # Placement forcé si nécessaire, en respectant la capacité
             if not placed:
                 for t_idx in table_indices:
-                    if len(tables[t_idx]) < capacity:
+                    target_cap = get_target_capacity(t_idx)
+                    if len(tables[t_idx]) < target_cap:
                         tables[t_idx].append(p)
                         placed = True
                         break
@@ -91,9 +103,8 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
         # Mise à jour de l'historique
         for table in tables:
             for p1 in table:
-                if "rien" in p1: continue # Les fantômes ne comptent pas dans l'historique
                 for p2 in table:
-                    if p1 != p2 and "rien" not in p2:
+                    if p1 != p2:
                         history[p1].add(p2)
         
         # Construction du round_data avec la structure correcte
@@ -112,14 +123,15 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
 
         all_rounds.append(round_data)
 
-    logger.info(f"✅ {len(all_rounds)} rounds générés avec succès | Participants réels: {participant_count} | Fantômes: {num_spectres}")
+    logger.info(f"✅ {len(all_rounds)} rounds générés avec succès | Participants: {participant_count}")
     
     return {
         "metadata": {
-            "participants_reels": participant_count,
-            "spectres_added": total_slots - participant_count,
+            "total_participants": participant_count,
+            "total_rounds": len(all_rounds),
+            "participants_per_table": base_capacity,
             "tables": tableCountLabel,
-            "time_per_round": effective_time_per_round,
+            "time_per_round_minutes": effective_time_per_round,
             "rounds_generated": len(all_rounds)
         },
         "rounds": all_rounds
