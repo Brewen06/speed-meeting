@@ -147,6 +147,58 @@ function ParticipantsContent() {
         }
     };
 
+    const handleToggleAllActive = () => {
+        const targetActive = participants.some((p) => p.is_active === false);
+        const eligible = participants.filter((p) => p.is_active !== undefined && p.is_active !== null);
+        if (eligible.length === 0) {
+            return;
+        }
+
+        proceedToggleAllActive(targetActive, eligible);
+    };
+
+    const proceedToggleAllActive = async (targetActive: boolean, eligible: Participant[]) => {
+        const toUpdate = eligible.filter((p) => p.is_active !== targetActive);
+        if (toUpdate.length === 0) {
+            return;
+        }
+
+        const previousParticipants = participants;
+        setParticipants((prev) =>
+            prev.map((participant) =>
+                participant.is_active === undefined || participant.is_active === null
+                    ? participant
+                    : { ...participant, is_active: targetActive }
+            )
+        );
+        setError("");
+
+        try {
+            const responses = await Promise.all(
+                toUpdate.map((participant) =>
+                    fetch(`${API_BASE_URL}/api/participants/${participant.id}/active`, {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": adminAuthHeader,
+                        },
+                        body: JSON.stringify({ is_active: targetActive }),
+                    })
+                )
+            );
+
+            const failed = responses.filter((response) => !response.ok);
+            if (failed.length > 0) {
+                setError("Mise a jour partielle. Veuillez reessayer.");
+                setParticipants(previousParticipants);
+                return;
+            }
+        } catch {
+            setError("Erreur réseau. Veuillez réessayer.");
+            setParticipants(previousParticipants);
+        }
+    };
+
     const handleDeleteParticipant = async (id: number) => {
         const participant = participants.find(p => p.id === id);
         setConfirmModal({
@@ -447,6 +499,12 @@ function ParticipantsContent() {
         }
     };
 
+    const hasInactive = participants.some((participant) => participant.is_active === false);
+    const hasEligible = participants.some(
+        (participant) => participant.is_active !== null && participant.is_active !== undefined
+    );
+    const bulkToggleLabel = hasInactive ? "Tout activer" : "Tout desactiver";
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
             <main className="mx-auto flex w-full max-w-7xl flex-col items-center justify-start py-12 px-6 sm:py-20">
@@ -541,6 +599,13 @@ function ParticipantsContent() {
                                 className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                             >
                                 Ajouter un participant
+                            </button>
+                            <button
+                                onClick={handleToggleAllActive}
+                                disabled={!hasEligible || isLoading}
+                                className="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:bg-zinc-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-white"
+                            >
+                                {bulkToggleLabel}
                             </button>
                             <button
                                 onClick={handleClear}
