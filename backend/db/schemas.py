@@ -8,6 +8,7 @@ class ParticipantBase(BaseModel):
     nom: str
     prenom: str
     nom_complet: Optional[str] = None
+    telephone: Optional[str] = None
     email: Optional[str] = None
     profession: Optional[str] = None
     entreprise: Optional[str] = None

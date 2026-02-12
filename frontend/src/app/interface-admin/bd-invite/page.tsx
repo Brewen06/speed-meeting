@@ -9,6 +9,7 @@ interface Participant {
     nom_complet: string;
     nom?: string | null;
     prenom?: string | null;
+    telephone?: string | null;
     email?: string | null;
     profession?: string | null;
     entreprise?: string | null;
@@ -24,6 +25,7 @@ function ParticipantsContent() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
     const [editNomComplet, setEditNomComplet] = useState("");
+    const [editTelephone, setEditTelephone] = useState("");
     const [editEmail, setEditEmail] = useState("");
     const [editProfession, setEditProfession] = useState("");
     const [editEntreprise, setEditEntreprise] = useState("");
@@ -200,6 +202,7 @@ function ParticipantsContent() {
     const openEditModal = (participant: Participant) => {
         setEditingParticipant(participant);
         setEditNomComplet(participant.nom_complet ?? "");
+        setEditTelephone(participant.telephone ?? "");
         setEditEmail(participant.email ?? "");
         setEditProfession(participant.profession ?? "");
         setEditEntreprise(participant.entreprise ?? "");
@@ -214,6 +217,7 @@ function ParticipantsContent() {
 
     const hasEdits = editingParticipant
         ? editNomComplet.trim() !== (editingParticipant.nom_complet ?? "")
+        || editTelephone.trim() !== (editingParticipant.telephone ?? "")
         || editEmail.trim() !== (editingParticipant.email ?? "")
         || editProfession.trim() !== (editingParticipant.profession ?? "")
         || editEntreprise.trim() !== (editingParticipant.entreprise ?? "")
@@ -258,6 +262,7 @@ function ParticipantsContent() {
                     },
                     body: JSON.stringify({
                         nom_complet: trimmedNom,
+                        telephone: editTelephone.trim(),
                         email: editEmail.trim(),
                         profession: editProfession.trim(),
                         entreprise: editEntreprise.trim(),
@@ -438,12 +443,13 @@ function ParticipantsContent() {
                     </div>
 
                     <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                        <div className="grid grid-cols-15 gap-4 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
+                        <div className="grid grid-cols-15 gap-3 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
                             <div className="col-span-4">Participant</div>
                             <div className="col-span-3">Entreprise</div>
                             <div className="col-span-3">Email</div>
-                            <div className="col-span-2 text-center">Actif</div>
-                            <div className="col-span-3 text-center">Actions</div>
+                            <div className="col-span-2 text-center">Telephone</div>
+                            <div className="col-span-1 text-center">Actif</div>
+                            <div className="col-span-2 text-center">Actions</div>
                         </div>
 
                         {isLoading ? (
@@ -457,7 +463,7 @@ function ParticipantsContent() {
                         ) : (
                             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                                 {participants.map((participant) => (
-                                    <div key={participant.id} className="grid grid-cols-15 gap-4 px-6 py-4 items-center">
+                                    <div key={participant.id} className="grid grid-cols-15 gap-3 px-4 py-3 items-center">
                                         <div className="col-span-4">
                                             <div className="text-sm font-semibold text-black dark:text-white">
                                                 {participant.nom_complet || [participant.prenom, participant.nom].filter(Boolean).join(" ")}
@@ -466,13 +472,22 @@ function ParticipantsContent() {
                                                 {participant.profession || "Profession non renseignee"}
                                             </div>
                                         </div>
-                                        <div className="col-span-3 text-sm text-zinc-600 dark:text-zinc-400">
+                                        <div className="col-span-3 text-sm text-zinc-600 dark:text-zinc-400 break-words">
                                             {participant.entreprise || "-"}
                                         </div>
-                                        <div className="col-span-3 text-sm text-zinc-600 dark:text-zinc-400">
+                                        <div className="col-span-3 text-sm text-zinc-600 dark:text-zinc-400 break-all">
                                             {participant.email || "-"}
                                         </div>
-                                        <div className="col-span-2 flex justify-center">
+                                        <div className="col-span-2 text-center">
+                                            {participant.telephone ? (
+                                                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                                                    {participant.telephone}
+                                                </span>
+                                            ) : (
+                                                <span className="text-sm text-zinc-600 dark:text-zinc-400">-</span>
+                                            )}
+                                        </div>
+                                        <div className="col-span-1 flex justify-center">
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleActive(participant)}
@@ -486,12 +501,12 @@ function ParticipantsContent() {
                                                 />
                                             </button>
                                         </div>
-                                        <div className="col-span-3 flex justify-center gap-3">
+                                        <div className="col-span-2 flex flex-wrap justify-center gap-2">
                                             <button
                                                 onClick={() => {
                                                     handleDeleteParticipant(participant.id);
                                                 }}
-                                                className="inline-flex items-center rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                className="inline-flex items-center rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                                             >
                                                 Supprimer
                                             </button>
@@ -499,7 +514,7 @@ function ParticipantsContent() {
                                                 onClick={() => {
                                                     openEditModal(participant);
                                                 }}
-                                                className="inline-flex items-center rounded-lg bg-zinc-900 px-5 py-2 text-sm font-semibold text-white hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-white"
+                                                className="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-white"
                                             >
                                                 Modifier
                                             </button>
@@ -569,15 +584,26 @@ function ParticipantsContent() {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-black dark:text-white">
-                                            Profession
+                                            Telephone
                                         </label>
                                         <input
                                             type="text"
-                                            value={editProfession}
-                                            onChange={(e) => setEditProfession(e.target.value)}
+                                            value={editTelephone}
+                                            onChange={(e) => setEditTelephone(e.target.value)}
                                             className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
                                         />
                                     </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-black dark:text-white">
+                                        Profession
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editProfession}
+                                        onChange={(e) => setEditProfession(e.target.value)}
+                                        className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-black dark:text-white">

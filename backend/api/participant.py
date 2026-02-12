@@ -32,10 +32,10 @@ async def upload_participants(
         normalized_columns = [str(col).strip().lower() for col in df.columns]
 
         known_header_candidates = {
-            "nom", "prenom", "prénom", "nom complet", "full name", "email",
-            "e-mail", "mail", "courriel", "poste", "profession", "job title",
-            "fonction", "métier", "metier", "société", "entreprise", "company",
-            "organization", "organisation", "agence", "business"
+            "nom", "name", "lastname", "prenom", "prénom", "firstname", "nom complet", 
+            "full name", "telephone", "email", "e-mail", "mail", "courriel", "poste", 
+            "profession", "job title", "fonction", "métier", "metier", "société", 
+            "entreprise", "company", "organization", "organisation", "agence", "business"
         }
 
         has_known_headers = any(col in known_header_candidates for col in normalized_columns)
@@ -54,15 +54,16 @@ async def upload_participants(
         if column_order:
             default_order = [item.strip().lower() for item in column_order.split(",") if item.strip()]
 
-        allowed_fields = {"nom", "prenom", "nom_complet", "email", "profession", "entreprise"}
+        allowed_fields = {"nom", "prenom", "nom_complet", "telephone", "email", "profession", "entreprise"}
         if any(field not in allowed_fields for field in default_order):
-            raise HTTPException(status_code=400, detail="column_order invalide. Champs autorises: nom, prenom, nom_complet, email, profession, entreprise")
+            raise HTTPException(status_code=400, detail="column_order invalide. Champs autorises: nom, prenom, nom_complet, telephone, email, profession, entreprise")
 
         if not has_known_headers:
             field_to_index = {field: idx for idx, field in enumerate(default_order)}
             col_nom = field_to_index.get("nom")
             col_prenom = field_to_index.get("prenom")
             col_nom_complet = field_to_index.get("nom_complet")
+            col_telephone = field_to_index.get("telephone")
             col_email = field_to_index.get("email")
             col_profession = field_to_index.get("profession")
             col_entreprise = field_to_index.get("entreprise")
@@ -70,6 +71,7 @@ async def upload_participants(
             col_nom = get_column("nom", "Nom", "NOM", "last name", "Last name", "Last Name", "lastname", "Lastname", "LASTNAME", "LAST NAME", "nom de famille", "Nom de famille", "Nom de Famille", "Nom De Famille", "NOM DE FAMILLE")
             col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
             col_nom_complet = get_column("nom complet", "Nom Complet", "Nom complet", "full name", "Full name", "Full Name", "fullname", "Fullname", "FULLNAME", "FULL NAME")
+            col_telephone = get_column("telephone", "Telephone", "TELEPHONE", "téléphone", "Téléphone", "TÉLÉPHONE", "phone", "Phone", "PHONE", "mobile", "Mobile", "MOBILE")
             col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL", "courriel", "Courriel", "COURRIEL", "adresse email", "Adresse email", "Adresse Email", "ADRESSE EMAIL", "adresse e-mail", "Adresse e-mail", "Adresse E-mail", "ADRESSE E-MAIL")
             col_profession = get_column("poste", "Poste", "POSTE", "profession", "Profession", "PROFESSION", "job title", "Job title", "JOB TITLE", "job", "Job", "JOB", "fonction", "Fonction", "FONCTION", "métier", "Métier", "MÉTIER", "metier", "Metier", "METIER", "trvail", "Travail", "TRAVAIL", "occupation", "Occupation", "OCCUPATION")
             col_entreprise = get_column("société", "Société", "SOCIÉTÉ", "entreprise", "Entreprise", "ENTREPRISE", "company", "Company", "COMPANY", "organization", "Organization", "ORGANIZATION", "organisation", "Organisation", "ORGANISATION", "agence", "Agence", "AGENCE", "firm", "Firm", "FIRM", "business", "Business", "BUSINESS")
@@ -90,6 +92,7 @@ async def upload_participants(
             nom = get_value(row, col_nom, is_index=is_indexed) or ""
             prenom = get_value(row, col_prenom, is_index=is_indexed) or ""
             nom_complet = get_value(row, col_nom_complet, is_index=is_indexed) or ""
+            telephone = get_value(row, col_telephone, is_index=is_indexed)
             email = get_value(row, col_email, is_index=is_indexed)
             profession = get_value(row, col_profession, is_index=is_indexed)
             entreprise = get_value(row, col_entreprise, is_index=is_indexed)
@@ -104,6 +107,7 @@ async def upload_participants(
                 "nom": nom,
                 "prenom": prenom,
                 "nom_complet": nom_complet,
+                "telephone": telephone or None,
                 "email": email or None,
                 "profession": profession or None,
                 "entreprise": entreprise or None
@@ -133,6 +137,8 @@ async def upload_participants(
                     existing.prenom = row["prenom"]
                 if row["nom_complet"]:
                     existing.nom_complet = row["nom_complet"]
+                if row["telephone"]:
+                    existing.telephone = row["telephone"]
                 if row["email"]:
                     existing.email = row["email"]
                 if row["profession"]:
@@ -148,6 +154,7 @@ async def upload_participants(
                     nom=row["nom"],
                     prenom=row["prenom"],
                     nom_complet=row["nom_complet"],
+                    telephone=row["telephone"],
                     email=row["email"],
                     profession=row["profession"],
                     entreprise=row["entreprise"],
@@ -175,9 +182,11 @@ class ParticipantCreate(BaseModel):
     prenom: str | None = None
     nom_complet: str | None = None
     email: str | None = None
+    telephone: str | None = None
 
 class ParticipantUpdate(BaseModel):
     nom_complet: str | None = None
+    telephone: str | None = None
     email: str | None = None
     profession: str | None = None
     entreprise: str | None = None
@@ -276,6 +285,7 @@ def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db
     nom = (participant.nom or "").strip()
     prenom = (participant.prenom or "").strip()
     nom_complet = (participant.nom_complet or "").strip()
+    telephone = (participant.telephone or "").strip() or None
     email = (participant.email or "").strip() or None
 
     if not nom_complet:
@@ -284,7 +294,14 @@ def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db
     if not nom_complet:
         raise HTTPException(status_code=400, detail="Nom Complet requis")
 
-    new_p = Participant(nom=nom, prenom=prenom, nom_complet=nom_complet, email=email, is_active=True)
+    new_p = Participant(
+        nom=nom,
+        prenom=prenom,
+        nom_complet=nom_complet,
+        telephone=telephone,
+        email=email,
+        is_active=True
+    )
     db.add(new_p)
     db.commit()
     db.refresh(new_p)
@@ -331,6 +348,10 @@ def update_participant(
     if payload.email is not None:
         email = payload.email.strip()
         participant.email = email or None
+
+    if payload.telephone is not None:
+        telephone = payload.telephone.strip()
+        participant.telephone = telephone or None
 
     if payload.profession is not None:
         profession = payload.profession.strip()

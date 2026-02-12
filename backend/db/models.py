@@ -9,6 +9,7 @@ class Participant(Base):
     nom = Column(String)
     prenom = Column(String)
     nom_complet = Column(String)
+    telephone = Column(String, nullable=True)
     email = Column(String, nullable=True)
     profession = Column(String, nullable=True)
     entreprise = Column(String, nullable=True)
