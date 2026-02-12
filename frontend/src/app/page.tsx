@@ -16,24 +16,21 @@ export default function Home() {
           height={20}
           priority
         />
-        <div className="flex flex-col items-center gap-6 sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+        <div className="flex flex-col items-center gap-6 sm:items-start ">
+          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50 text-center">
             Speed Meeting
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 text-justify">
-            <b>Contexte</b>: Un repas d'affaires organisé par la FFI (<b>F</b>orces <b>F</b>rançaises de l'<b>I</b>ndustrie) réunit des professionnels de divers secteurs pour échanger et établir des contacts en partageant leur activité professionnelle et leur parcours.
+            <b>Contexte</b>: Dans le cadre d'un déjeuner d'affaires organisé par les Forces Françaises de l'Industrie (<b>FFI</b>), des professionnels de secteurs divers et variés se réunissent pour échanger et développer leur réseau et partager la richesse de leurs parcours. Cet événement favorise des rencontres qualitatives, propices à la découverte d’expertises, d’expériences et d’opportunités de collaboration.
             <br />
             <br />
-            <b>Objectif</b>: Créer des relations entre les invités afin de parler de parcours professionnel, d'affaires et de projets communs.
+            <b>Objectif</b>: Encourager la création de relations professionnelles durables en facilitant des échanges ciblés autour des parcours, des activités et des perspectives de projets communs. Chaque interaction vise à susciter des synergies, nourrir la réflexion stratégique et ouvrir de nouvelles perspectives d’affaires.
             <br />
             <br />
-            <b>Rôle de l'IA</b>: Gérer la disposition des participants à chaque table. Les invités sont assignés à des tables dans un ordre aléatoire et changent de table après chaque session du speed meeting.
+            <b>L'intelligence artificielle</b> orchestre la disposition des participants afin d’optimiser la diversité des rencontres. Les invités sont répartis de manière aléatoire à chaque table et changent de place à l’issue de chaque session de speed meeting, garantissant ainsi des échanges dynamiques et renouvelés.
             <br />
             <br />
-            <b>Fonctionnement</b>: Chaque invité scanne un QR code pour accéder à son profil. L'IA utilise le plan de la salle et les paramétrages de la session (nombre de participants, nombre de tables, durée de la session) pour organiser les rencontres.
-            <br />
-            <br />
-            <b className="text-red-500">Attention</b>: Les invités ne doivent pas rencontrer la même personne une seconde fois. Ainsi, il n'est pas obligatoire que toutes les personnes se rencontrent.
+            <b className="text-red-500">Attention</b>: Afin de préserver la qualité et la variété des interactions, les participants ne rencontrent jamais deux fois la même personne. Il n’est donc pas requis que l’ensemble des invités se rencontre, l’accent étant mis sur la pertinence et la richesse des échanges.
           </p>
         </div>
         <ClientOnly />
