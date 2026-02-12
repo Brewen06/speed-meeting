@@ -20,6 +20,11 @@ function ParametrageContent() {
   const [existingParticipantCount, setExistingParticipantCount] = useState(0);
   const [activeParticipantCount, setActiveParticipantCount] = useState(0);
   const [isExistingCountLoading, setIsExistingCountLoading] = useState(true);
+  const [hasExistingSession, setHasExistingSession] = useState(false);
+  const [existingSessionSummary, setExistingSessionSummary] = useState<{
+    total_participants?: number;
+    total_rounds?: number;
+  } | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,6 +54,27 @@ function ParametrageContent() {
     };
 
     loadExistingParticipants();
+  }, []);
+
+  useEffect(() => {
+    const savedResults = localStorage.getItem("sessionResults");
+    if (!savedResults) {
+      setHasExistingSession(false);
+      setExistingSessionSummary(null);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(savedResults);
+      setHasExistingSession(true);
+      setExistingSessionSummary({
+        total_participants: parsed?.metadata?.total_participants,
+        total_rounds: parsed?.metadata?.total_rounds,
+      });
+    } catch {
+      setHasExistingSession(false);
+      setExistingSessionSummary(null);
+    }
   }, []);
 
   const handleFileUpload = async () => {
@@ -139,7 +165,11 @@ function ParametrageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
       <main className="mx-auto flex w-full max-w-2xl flex-col items-center justify-start py-12 px-6 sm:py-20">
+
         <div className="w-full">
+          <a href="/interface-admin/" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Retour
+          </a>
           <h1 className="text-4xl font-bold tracking-tight text-black dark:text-white mb-2">
             Paramètrages de la session
           </h1>
@@ -151,6 +181,34 @@ function ParametrageContent() {
           {error && (
             <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
+          {hasExistingSession && (
+            <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Une session existe deja. {existingSessionSummary?.total_participants ? `${existingSessionSummary.total_participants} participant(s)` : ""}{existingSessionSummary?.total_rounds ? `, ${existingSessionSummary.total_rounds} rotation(s)` : ""}.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/interface-admin/analyse")}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                >
+                  Revenir a la session
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem("sessionResults");
+                    setHasExistingSession(false);
+                    setExistingSessionSummary(null);
+                  }}
+                  className="px-4 py-2 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white text-sm font-semibold rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  Creer une nouvelle session
+                </button>
+              </div>
             </div>
           )}
 

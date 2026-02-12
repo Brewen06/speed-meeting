@@ -31,7 +31,6 @@ interface SessionResults {
 function AnalyseContent() {
   const router = useRouter();
   const [sessionResults, setSessionResults] = useState<SessionResults | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
 
@@ -42,68 +41,25 @@ function AnalyseContent() {
 
       if (!savedResults) {
         setError("Aucune session générée. Veuillez d'abord configurer une session.");
-        setIsLoading(false);
         return;
       }
 
       try {
         const results = JSON.parse(savedResults);
         setSessionResults(results);
-        setIsLoading(false);
       } catch {
         setError("Erreur lors de la lecture des résultats.");
-        setIsLoading(false);
       }
-    }, 2000);
+    },);
 
     return () => clearTimeout(timer);
   }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-          <div className="flex flex-col items-center gap-6 sm:items-start sm:text-left">
-            <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-              Analyse de la session en cours
-            </h1>
-
-            <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-              Veuillez patientez pendant que l'IA analyse le plan de la salle et
-              les paramétrages de la session ... <br></br>
-              Elle détermine le nombre d'invités présents sur une seule table pendant quelques minutes.
-              <div className="mt-8 flex flex-col items-center gap-4">
-                <div className="flex gap-2">
-                  <div
-                    className="w-3 h-3 bg-blue-600 rounded-full animate-bounce"
-                    style={{ animationDelay: "0s" }}
-                  ></div>
-                  <div
-                    className="w-3 h-3 bg-blue-600 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                  <div
-                    className="w-3 h-3 bg-blue-600 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.4s" }}
-                  ></div>
-                </div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  Chargement en cours...
-                </p>
-              </div>
-            </p>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
         <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black">
           <div className="text-center space-y-6">
-            <div className="text-6xl">⚠️</div>
             <h1 className="text-3xl font-semibold text-black dark:text-zinc-50">
               Erreur
             </h1>
@@ -136,44 +92,27 @@ function AnalyseContent() {
             </p>
           </div>
 
-          {/* Métadonnées */}
-          {sessionResults?.metadata && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md p-6 border border-zinc-200 dark:border-zinc-800">
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {sessionResults.metadata.total_participants}
-                </div>
-                <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                  Participants
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md p-6 border border-zinc-200 dark:border-zinc-800">
-                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {sessionResults.metadata.total_rounds}
-                </div>
-                <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                  Rotations
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md p-6 border border-zinc-200 dark:border-zinc-800">
-                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                  {sessionResults.metadata.participants_per_table}
-                </div>
-                <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-                  Par table
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Détails des rounds */}
           <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">
-            <h2 className="text-2xl font-bold text-black dark:text-white mb-6">
-              Détails des rotations
-            </h2>
-
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold text-black dark:text-white">
+                Détails des rotations
+              </h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push("/interface-admin/parametrage")}
+                  className="px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-semibold rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  Nouvelle session
+                </button>
+                <button
+                  onClick={() => router.push("/interface-admin")}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  Tableau de bord
+                </button>
+              </div>
+            </div>
             {sessionResults?.rounds && sessionResults.rounds.length > 0 && (
               <div className="space-y-6">
                 {/* Navigation avec numéros de rotation */}
@@ -183,8 +122,8 @@ function AnalyseContent() {
                       key={index}
                       onClick={() => setCurrentRoundIndex(index)}
                       className={`w-10 h-10 rounded-lg font-semibold transition-all ${currentRoundIndex === index
-                          ? "bg-blue-600 text-white shadow-md scale-110"
-                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                        ? "bg-blue-600 text-white shadow-md scale-110"
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                         }`}
                     >
                       {index + 1}
@@ -205,10 +144,6 @@ function AnalyseContent() {
                         className="bg-white dark:bg-zinc-950 rounded-lg p-4 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow"
                       >
                         <div className="font-bold text-lg text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-2">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
                           {table.table_name}
                         </div>
                         <ul className="text-sm text-zinc-700 dark:text-zinc-300 space-y-2">
