@@ -25,6 +25,20 @@ function MesTables() {
   const [retryTick, setRetryTick] = useState(0);
   const [currentRotationIndex, setCurrentRotationIndex] = useState(0);
 
+  // Restaurer l'itinéraire depuis localStorage au démarrage
+  useEffect(() => {
+    const savedItinerary = localStorage.getItem("participantItinerary");
+    if (savedItinerary) {
+      try {
+        const parsed = JSON.parse(savedItinerary);
+        setItinerary(parsed);
+        setIsLoading(false);
+      } catch {
+        // Ignorer les erreurs de parsing, on chargera normalement
+      }
+    }
+  }, []);
+
   useEffect(() => {
     let isActive = true;
     let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -63,6 +77,7 @@ function MesTables() {
 
         updateState(() => {
           setItinerary(payload);
+          localStorage.setItem("participantItinerary", JSON.stringify(payload));
           setIsLoading(false);
           setIsWaiting(false);
           setError("");
@@ -133,6 +148,11 @@ function MesTables() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-start py-12 px-6 bg-white dark:bg-black">
+        <div>
+          <a href="/interface-invite/" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Retour
+          </a>
+        </div>
         <div className="w-full">
           <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50 mb-2">
             Mes tables
@@ -194,8 +214,8 @@ function MesTables() {
                         key={index}
                         onClick={() => setCurrentRotationIndex(index)}
                         className={`w-10 h-10 rounded-lg font-semibold transition-all ${currentRotationIndex === index
-                            ? "bg-blue-600 text-white shadow-md scale-110"
-                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                          ? "bg-blue-600 text-white shadow-md scale-110"
+                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                           }`}
                       >
                         {index + 1}
