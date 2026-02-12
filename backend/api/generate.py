@@ -48,3 +48,27 @@ def create_session(config: SessionConfig, db: Session = Depends(get_db)):
         "rounds": result.get("rounds", []),
         "message": "Session générée avec succès. Les participants peuvent consulter leurs tables."
     }
+
+@router.post("/end-session/{session_id}")
+def end_session(session_id: int, db: Session = Depends(get_db)):
+    """
+    Termine une session de speed meeting
+    """
+    session = db.query(MeetingSession).filter(MeetingSession.id == session_id).first()
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session non trouvée")
+    
+    if not session.is_active:
+        raise HTTPException(status_code=400, detail="Cette session est déjà terminée")
+    
+    # Marquer la session comme terminée
+    session.is_active = False
+    session.ended_at = datetime.datetime.utcnow()
+    db.commit()
+    
+    return {
+        "message": "Session terminée avec succès",
+        "session_id": session_id,
+        "ended_at": session.ended_at
+    }

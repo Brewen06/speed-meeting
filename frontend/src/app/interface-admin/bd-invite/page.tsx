@@ -517,7 +517,8 @@ function ParticipantsContent() {
                             Consultation des participants
                         </h1>
                         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-3xl">
-                            Consultez, recherchez et activez ou desactivez les participants. Les invites desactives ne seront pas pris en compte lors du lancement de la session. Vous pouvez egalement supprimer ou modifier des participants ou vider la liste complete.
+                            Consultez et recherchez les participants, puis activez ou désactivez leur présence en toute simplicité. Les invités désactivés ne seront pas pris en compte lors du lancement de la session.
+                            Vous avez également la possibilité de modifier ou de supprimer des participants individuellement, ou encore de réinitialiser entièrement la liste pour une gestion optimale.
                         </p>
                     </div>
                     <div className="mb-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md p-8 border border-zinc-200 dark:border-zinc-800">

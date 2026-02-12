@@ -201,8 +201,7 @@ function ParametrageContent() {
             Paramètrages de la session
           </h1>
           <p className="text-base text-zinc-600 dark:text-zinc-400 mb-8">
-            Veuillez mettre ici les paramètrages de la session afin que l'IA
-            détermine le nombre de personnes à placer sur une table en un tour.
+            Renseignez ici les paramètres de la session afin de permettre à l’intelligence artificielle de déterminer avec précision le nombre de participants à répartir à chaque table lors d’un tour.
           </p>
 
           {error && (

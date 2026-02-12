@@ -33,6 +33,45 @@ function AnalyseContent() {
   const [sessionResults, setSessionResults] = useState<SessionResults | null>(null);
   const [error, setError] = useState("");
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
+  const [isEndingSession, setIsEndingSession] = useState(false);
+
+  const handleEndSession = async () => {
+    if (!sessionResults?.session_id) return;
+
+    const confirmed = window.confirm(
+      "Êtes-vous sûr de vouloir terminer cette session ? Cette action est irréversible."
+    );
+
+    if (!confirmed) return;
+
+    setIsEndingSession(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/generate/end-session/${sessionResults.session_id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Échec de la terminaison de la session");
+      }
+
+      // Nettoyer le localStorage
+      localStorage.removeItem("sessionResults");
+
+      // Rediriger vers le tableau de bord
+      alert("Session terminée avec succès !");
+      router.push("/interface-admin");
+    } catch (err) {
+      alert("Erreur lors de la terminaison de la session. Veuillez réessayer.");
+      console.error(err);
+    } finally {
+      setIsEndingSession(false);
+    }
+  };
 
   useEffect(() => {
     // Simuler une "analyse" pendant quelques secondes puis afficher les résultats
@@ -100,21 +139,28 @@ function AnalyseContent() {
               </h2>
               <div className="flex gap-3">
                 <button
+                  onClick={() => router.push("/interface-admin")}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  Tableau de bord
+                </button>
+                <button
                   onClick={() => router.push("/interface-admin/parametrage")}
                   className="px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-semibold rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
                 >
                   Nouvelle session
                 </button>
                 <button
-                  onClick={() => router.push("/interface-admin")}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                  onClick={handleEndSession}
+                  disabled={isEndingSession}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Tableau de bord
+                  {isEndingSession ? "Terminaison..." : "Fin de session"}
                 </button>
               </div>
             </div>
             {sessionResults?.rounds && sessionResults.rounds.length > 0 && (
-              <div className="space-y-6">
+              <div className="space-y-6 mt-8">
                 {/* Navigation avec numéros de rotation */}
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   {sessionResults.rounds.map((_, index) => (
@@ -194,16 +240,23 @@ function AnalyseContent() {
           {/* Actions */}
           <div className="flex gap-4 justify-center">
             <button
+              onClick={() => router.push("/interface-admin")}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              Tableau de bord
+            </button>
+            <button
               onClick={() => router.push("/interface-admin/parametrage")}
               className="px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-semibold rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
             >
               Nouvelle session
             </button>
             <button
-              onClick={() => router.push("/interface-admin")}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+              onClick={handleEndSession}
+              disabled={isEndingSession}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Tableau de bord
+              {isEndingSession ? "Terminaison..." : "Fin de session"}
             </button>
           </div>
         </div>

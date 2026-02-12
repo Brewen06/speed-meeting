@@ -28,6 +28,8 @@ class MeetingSession(Base):
     __tablename__ = "sessions"
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    ended_at = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
     total_duration_minutes = Column(Integer)
     number_of_tables = Column(Integer)
     rounds_data = Column(JSON)
