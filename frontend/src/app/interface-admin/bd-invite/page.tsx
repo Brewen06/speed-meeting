@@ -332,8 +332,8 @@ function ParticipantsContent() {
     const saveParticipantAdd = async () => {
         const trimmedPrenom = addPrenom.trim();
         const trimmedNom = addNom.trim();
-        if (trimmedPrenom.length === 0 && trimmedNom.length === 0) {
-            setError("Veuillez renseigner au moins le prenom ou le nom.");
+        if (trimmedPrenom.length === 0 || trimmedNom.length === 0) {
+            setError("Le prenom et le nom sont obligatoires.");
             return;
         }
 
@@ -503,7 +503,7 @@ function ParticipantsContent() {
     const hasEligible = participants.some(
         (participant) => participant.is_active !== null && participant.is_active !== undefined
     );
-    const bulkToggleLabel = hasInactive ? "Tout activer" : "Tout desactiver";
+    const bulkToggleLabel = hasInactive ? "Tout activer" : "Tout inactiver";
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-black dark:to-zinc-900 font-sans">
@@ -828,7 +828,7 @@ function ParticipantsContent() {
                                         Ajouter un participant
                                     </h2>
                                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                                        Renseignez au minimum le prenom ou le nom.
+                                        Renseignez le prenom et le nom.
                                     </p>
                                 </div>
                                 <button
@@ -843,7 +843,7 @@ function ParticipantsContent() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-black dark:text-white">
-                                            Prenom
+                                            Prenom *
                                         </label>
                                         <input
                                             type="text"
@@ -854,7 +854,7 @@ function ParticipantsContent() {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-black dark:text-white">
-                                            Nom
+                                            Nom *
                                         </label>
                                         <input
                                             type="text"
@@ -931,7 +931,7 @@ function ParticipantsContent() {
                                 <button
                                     type="button"
                                     onClick={saveParticipantAdd}
-                                    disabled={isAdding || (addPrenom.trim().length === 0 && addNom.trim().length === 0) || !!addEmailError}
+                                    disabled={isAdding || addPrenom.trim().length === 0 || addNom.trim().length === 0 || !!addEmailError}
                                     className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm font-semibold"
                                 >
                                     {isAdding ? "Enregistrement..." : "Ajouter"}
