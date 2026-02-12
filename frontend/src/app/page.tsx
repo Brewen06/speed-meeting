@@ -10,10 +10,10 @@ export default function Home() {
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <Image
           className="dark:invert"
-          src="/FFI.jpg"
-          alt="FFI logo"
+          src="/LIF.jpg"
+          alt="LIF logo"
           width={100}
-          height={20}
+          height={100}
           priority
         />
         <div className="flex flex-col items-center gap-6 sm:items-start ">
