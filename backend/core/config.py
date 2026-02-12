@@ -19,4 +19,10 @@ class Settings:
     DEFAULT_TIME_PER_ROUND: int = 10
     DEFAULT_SESSION_DURATION: int = 60
 
+    # Import participants (ordre par defaut si pas d'en-tetes)
+    DEFAULT_IMPORT_COLUMN_ORDER: list = os.getenv(
+        "IMPORT_COLUMN_ORDER",
+        "prenom,nom,nom_complet,entreprise,profession,email"
+    ).split(",")
+
 settings = Settings()

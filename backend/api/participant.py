@@ -1,18 +1,20 @@
 import io
 import pandas as pd
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import Participant, MeetingSession, ParticipantTableAssignment
 from pydantic import BaseModel
 from api.auth import get_current_admin
+from core.config import settings
 
 router = APIRouter()
 
 @router.post("/participants/upload")
 async def upload_participants(
-    file: UploadFile = File(...), 
+    file: UploadFile = File(...),
+    column_order: str | None = Form(None),
     db: Session = Depends(get_db), current_admin: Participant = Depends(get_current_admin)
 ):
     if not file.filename.endswith(('.csv', '.xlsx', '.xls')):
@@ -20,33 +22,77 @@ async def upload_participants(
 
     try:
         contents = await file.read()
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(io.BytesIO(contents))
-        else:
-            df = pd.read_excel(io.BytesIO(contents))
 
+        def read_dataframe(has_header: bool = True) -> pd.DataFrame:
+            if file.filename.endswith('.csv'):
+                return pd.read_csv(io.BytesIO(contents), header=0 if has_header else None)
+            return pd.read_excel(io.BytesIO(contents), header=0 if has_header else None)
+
+        df = read_dataframe(has_header=True)
         normalized_columns = [str(col).strip().lower() for col in df.columns]
+
+        known_header_candidates = {
+            "nom", "prenom", "prénom", "nom complet", "full name", "email",
+            "e-mail", "mail", "courriel", "poste", "profession", "job title",
+            "fonction", "métier", "metier", "société", "entreprise", "company",
+            "organization", "organisation", "agence", "business"
+        }
+
+        has_known_headers = any(col in known_header_candidates for col in normalized_columns)
+
+        if not has_known_headers:
+            df = read_dataframe(has_header=False)
+            normalized_columns = [str(col).strip().lower() for col in df.columns]
+
         def get_column(*candidates):
             for candidate in candidates:
                 if candidate in normalized_columns:
                     return df.columns[normalized_columns.index(candidate)]
             return None
 
-        col_nom = get_column("nom", "Nom", "NOM", "last name", "Last name", "Last Name", "lastname", "Lastname", "LASTNAME", "LAST NAME")
-        col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
-        col_nom_complet = get_column("nom complet", "Nom Complet", "Nom complet", "full name", "Full name", "Full Name", "fullname", "Fullname", "FULLNAME", "FULL NAME")
-        col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL", "courriel", "Courriel", "COURRIEL", "adresse email", "Adresse email", "Adresse Email", "ADRESSE EMAIL", "adresse e-mail", "Adresse e-mail", "Adresse E-mail", "ADRESSE E-MAIL")
-        col_profession = get_column("poste", "Poste", "POSTE", "profession", "Profession", "PROFESSION", "job title", "Job title", "JOB TITLE", "job", "Job", "JOB")
-        col_entreprise = get_column("société", "Société", "SOCIÉTÉ", "entreprise", "Entreprise", "ENTREPRISE", "company", "Company", "COMPANY", "organization", "Organization", "ORGANIZATION", "organisation", "Organisation", "ORGANISATION")
+        default_order = [item.strip().lower() for item in settings.DEFAULT_IMPORT_COLUMN_ORDER if item.strip()]
+        if column_order:
+            default_order = [item.strip().lower() for item in column_order.split(",") if item.strip()]
+
+        allowed_fields = {"nom", "prenom", "nom_complet", "email", "profession", "entreprise"}
+        if any(field not in allowed_fields for field in default_order):
+            raise HTTPException(status_code=400, detail="column_order invalide. Champs autorises: nom, prenom, nom_complet, email, profession, entreprise")
+
+        if not has_known_headers:
+            field_to_index = {field: idx for idx, field in enumerate(default_order)}
+            col_nom = field_to_index.get("nom")
+            col_prenom = field_to_index.get("prenom")
+            col_nom_complet = field_to_index.get("nom_complet")
+            col_email = field_to_index.get("email")
+            col_profession = field_to_index.get("profession")
+            col_entreprise = field_to_index.get("entreprise")
+        else:
+            col_nom = get_column("nom", "Nom", "NOM", "last name", "Last name", "Last Name", "lastname", "Lastname", "LASTNAME", "LAST NAME", "nom de famille", "Nom de famille", "Nom de Famille", "Nom De Famille", "NOM DE FAMILLE")
+            col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
+            col_nom_complet = get_column("nom complet", "Nom Complet", "Nom complet", "full name", "Full name", "Full Name", "fullname", "Fullname", "FULLNAME", "FULL NAME")
+            col_email = get_column("email", "Email", "e-mail", "E-mail", "EMAIL", "E-MAIL", "mail", "Mail", "MAIL", "courriel", "Courriel", "COURRIEL", "adresse email", "Adresse email", "Adresse Email", "ADRESSE EMAIL", "adresse e-mail", "Adresse e-mail", "Adresse E-mail", "ADRESSE E-MAIL")
+            col_profession = get_column("poste", "Poste", "POSTE", "profession", "Profession", "PROFESSION", "job title", "Job title", "JOB TITLE", "job", "Job", "JOB", "fonction", "Fonction", "FONCTION", "métier", "Métier", "MÉTIER", "metier", "Metier", "METIER", "trvail", "Travail", "TRAVAIL", "occupation", "Occupation", "OCCUPATION")
+            col_entreprise = get_column("société", "Société", "SOCIÉTÉ", "entreprise", "Entreprise", "ENTREPRISE", "company", "Company", "COMPANY", "organization", "Organization", "ORGANIZATION", "organisation", "Organisation", "ORGANISATION", "agence", "Agence", "AGENCE", "firm", "Firm", "FIRM", "business", "Business", "BUSINESS")
 
         participants_rows = []
+        def get_value(row, column_ref, is_index: bool = False):
+            if column_ref is None:
+                return None
+            if is_index and (not isinstance(column_ref, int) or column_ref >= len(row)):
+                return None
+            value = row.iloc[column_ref] if is_index else row[column_ref]
+            if pd.isna(value):
+                return None
+            return str(value).strip()
+
+        is_indexed = not has_known_headers
         for _, row in df.iterrows():
-            nom = str(row[col_nom]).strip() if col_nom and pd.notna(row[col_nom]) else ""
-            prenom = str(row[col_prenom]).strip() if col_prenom and pd.notna(row[col_prenom]) else ""
-            nom_complet = str(row[col_nom_complet]).strip() if col_nom_complet and pd.notna(row[col_nom_complet]) else ""
-            email = str(row[col_email]).strip() if col_email and pd.notna(row[col_email]) else None
-            profession = str(row[col_profession]).strip() if col_profession and pd.notna(row[col_profession]) else None
-            entreprise = str(row[col_entreprise]).strip() if col_entreprise and pd.notna(row[col_entreprise]) else None
+            nom = get_value(row, col_nom, is_index=is_indexed) or ""
+            prenom = get_value(row, col_prenom, is_index=is_indexed) or ""
+            nom_complet = get_value(row, col_nom_complet, is_index=is_indexed) or ""
+            email = get_value(row, col_email, is_index=is_indexed)
+            profession = get_value(row, col_profession, is_index=is_indexed)
+            entreprise = get_value(row, col_entreprise, is_index=is_indexed)
             
             if not nom_complet:
                 nom_complet = " ".join(part for part in [prenom, nom] if part).strip()
