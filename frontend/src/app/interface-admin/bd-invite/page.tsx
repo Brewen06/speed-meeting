@@ -30,6 +30,15 @@ function ParticipantsContent() {
     const [editProfession, setEditProfession] = useState("");
     const [editEntreprise, setEditEntreprise] = useState("");
     const [editEmailError, setEditEmailError] = useState("");
+    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [addPrenom, setAddPrenom] = useState("");
+    const [addNom, setAddNom] = useState("");
+    const [addTelephone, setAddTelephone] = useState("");
+    const [addEmail, setAddEmail] = useState("");
+    const [addProfession, setAddProfession] = useState("");
+    const [addEntreprise, setAddEntreprise] = useState("");
+    const [addEmailError, setAddEmailError] = useState("");
+    const [isAdding, setIsAdding] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -238,6 +247,21 @@ function ParticipantsContent() {
         setEditingParticipant(null);
     };
 
+    const openAddModal = () => {
+        setAddPrenom("");
+        setAddNom("");
+        setAddTelephone("");
+        setAddEmail("");
+        setAddProfession("");
+        setAddEntreprise("");
+        setAddEmailError("");
+        setIsAddOpen(true);
+    };
+
+    const closeAddModal = () => {
+        setIsAddOpen(false);
+    };
+
     const hasEdits = editingParticipant
         ? editNomComplet.trim() !== (editingParticipant.nom_complet ?? "")
         || editTelephone.trim() !== (editingParticipant.telephone ?? "")
@@ -251,6 +275,60 @@ function ParticipantsContent() {
             return "";
         }
         return /.+@.+\..+/.test(value) ? "" : "Email invalide.";
+    };
+
+    const saveParticipantAdd = async () => {
+        const trimmedPrenom = addPrenom.trim();
+        const trimmedNom = addNom.trim();
+        if (trimmedPrenom.length === 0 && trimmedNom.length === 0) {
+            setError("Veuillez renseigner au moins le prenom ou le nom.");
+            return;
+        }
+
+        const emailError = validateEmail(addEmail);
+        if (emailError) {
+            setAddEmailError(emailError);
+            return;
+        }
+        setAddEmailError("");
+
+        setIsAdding(true);
+        setError("");
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/participants/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": adminAuthHeader,
+                },
+                body: JSON.stringify({
+                    nom: trimmedNom,
+                    prenom: trimmedPrenom,
+                    nom_complet: "",
+                    telephone: addTelephone.trim(),
+                    email: addEmail.trim(),
+                    profession: addProfession.trim(),
+                    entreprise: addEntreprise.trim(),
+                }),
+            });
+
+            const payload = await response.json();
+
+            if (!response.ok) {
+                setError(payload?.detail ?? "Ajout impossible.");
+                setIsAdding(false);
+                return;
+            }
+
+            const currentSearch = search.trim();
+            await loadParticipants(currentSearch);
+            setIsAdding(false);
+            closeAddModal();
+        } catch {
+            setError("Erreur réseau. Veuillez réessayer.");
+            setIsAdding(false);
+        }
     };
 
     const saveParticipantEdit = async () => {
@@ -457,12 +535,20 @@ function ParticipantsContent() {
                         <div className="text-sm text-zinc-600 dark:text-zinc-400">
                             {participants.length} participant{participants.length > 1 ? "s" : ""}
                         </div>
-                        <button
-                            onClick={handleClear}
-                            className="ml-4 inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        >
-                            Réinitialiser
-                        </button>
+                        <div className="ml-4 flex flex-wrap items-center gap-2">
+                            <button
+                                onClick={openAddModal}
+                                className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                            >
+                                Ajouter un participant
+                            </button>
+                            <button
+                                onClick={handleClear}
+                                className="inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                                Réinitialiser
+                            </button>
+                        </div>
                     </div>
 
                     <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -655,6 +741,135 @@ function ParticipantsContent() {
                                     className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold"
                                 >
                                     {isSavingId === editingParticipant.id ? "Enregistrement..." : "Enregistrer"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {isAddOpen && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                        onClick={closeAddModal}
+                        role="presentation"
+                    >
+                        <div
+                            className="w-full max-w-xl rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl"
+                            onClick={(event) => event.stopPropagation()}
+                            role="presentation"
+                        >
+                            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-black dark:text-white">
+                                        Ajouter un participant
+                                    </h2>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        Renseignez au minimum le prenom ou le nom.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={closeAddModal}
+                                    className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="px-6 py-5 space-y-4" onClick={(event) => event.stopPropagation()} role="presentation">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-black dark:text-white">
+                                            Prenom
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={addPrenom}
+                                            onChange={(e) => setAddPrenom(e.target.value)}
+                                            className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-black dark:text-white">
+                                            Nom
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={addNom}
+                                            onChange={(e) => setAddNom(e.target.value)}
+                                            className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-black dark:text-white">
+                                            Email (optionnel)
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={addEmail}
+                                            onChange={(e) => {
+                                                setAddEmail(e.target.value);
+                                                setAddEmailError(validateEmail(e.target.value));
+                                            }}
+                                            className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white ${addEmailError
+                                                ? "border-red-400 focus:ring-2 focus:ring-red-500"
+                                                : "border-zinc-300 dark:border-zinc-700"
+                                                }`}
+                                        />
+                                        {addEmailError && (
+                                            <p className="text-xs text-red-500">{addEmailError}</p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-black dark:text-white">
+                                            Telephone (optionnel)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={addTelephone}
+                                            onChange={(e) => setAddTelephone(e.target.value)}
+                                            className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-black dark:text-white">
+                                        Profession
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={addProfession}
+                                        onChange={(e) => setAddProfession(e.target.value)}
+                                        className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-black dark:text-white">
+                                        Entreprise
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={addEntreprise}
+                                        onChange={(e) => setAddEntreprise(e.target.value)}
+                                        className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-end gap-3 border-t border-zinc-200 dark:border-zinc-800 px-6 py-4" onClick={(event) => event.stopPropagation()} role="presentation">
+                                <button
+                                    type="button"
+                                    onClick={closeAddModal}
+                                    className="px-4 py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={saveParticipantAdd}
+                                    disabled={isAdding || (addPrenom.trim().length === 0 && addNom.trim().length === 0) || !!addEmailError}
+                                    className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm font-semibold"
+                                >
+                                    {isAdding ? "Enregistrement..." : "Ajouter"}
                                 </button>
                             </div>
                         </div>
