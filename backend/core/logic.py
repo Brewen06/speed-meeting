@@ -59,6 +59,7 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
     num_rounds = max(1, min(max_rounds_by_time, max_theoretical_rounds))
 
     history = {p: set() for p in participants}
+    last_table = {p: None for p in participants}  # Tracker la dernière table de chaque participant
 
     all_rounds = []
     
@@ -73,8 +74,31 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
         # Placement des participants dans les tables avec distribution équilibrée
         for p in waiting_list:
             placed = False
-            table_indices = list(range(tableCountLabel))
-            random.shuffle(table_indices)
+            
+            # Privilégier les tables proches de la dernière table du participant
+            if last_table[p] is not None:
+                # Créer une liste de tables proches (fenêtre de +/- 6 tables)
+                proximity_range = 6
+                prev_table = last_table[p]
+                
+                # Tables proches en priorité
+                nearby_tables = []
+                for offset in range(-proximity_range, proximity_range + 1):
+                    t_idx = (prev_table + offset) % tableCountLabel
+                    nearby_tables.append(t_idx)
+                
+                # Mélanger les tables proches pour éviter un pattern fixe
+                random.shuffle(nearby_tables)
+                
+                # Ajouter les tables restantes
+                remaining_tables = [t for t in range(tableCountLabel) if t not in nearby_tables]
+                random.shuffle(remaining_tables)
+                
+                table_indices = nearby_tables + remaining_tables
+            else:
+                # Premier round: placement aléatoire
+                table_indices = list(range(tableCountLabel))
+                random.shuffle(table_indices)
             
             # Calculer la taille cible pour cette table
             def get_target_capacity(t_idx):
@@ -88,6 +112,7 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
                 if len(tables[t_idx]) < target_cap:
                     if not any(other in history[p] for other in tables[t_idx]):
                         tables[t_idx].append(p)
+                        last_table[p] = t_idx  # Enregistrer la table du participant
                         placed = True
                         break
             
@@ -97,6 +122,7 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
                     target_cap = get_target_capacity(t_idx)
                     if len(tables[t_idx]) < target_cap:
                         tables[t_idx].append(p)
+                        last_table[p] = t_idx  # Enregistrer la table du participant
                         placed = True
                         break
         
