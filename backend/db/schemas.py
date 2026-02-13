@@ -1,6 +1,23 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import List, Optional
 from datetime import datetime
+
+# ORGANIZER REQUEST
+
+class OrganizerRequestCreate(BaseModel):
+    nom: str
+    prenom: str
+    email: EmailStr
+    telephone: str
+    activite: str
+    entreprise: str
+    raison: str
+
+class OrganizerRequestResponse(OrganizerRequestCreate):
+    id: int
+    created_at: datetime
+    status: str
+    model_config = ConfigDict(from_attributes=True)
 
 # SCHEMAS DE BASE
 

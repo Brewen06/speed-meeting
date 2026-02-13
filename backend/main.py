@@ -2,11 +2,13 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import engine, Base, get_db
-from db.models import Participant, MeetingSession
+from db.models import Participant, MeetingSession, OrganizerRequest
 from api.generate import router as generate_router
 from api.participant import router as participant_router
 from api.auth import get_current_admin
 from api.auth import router as auth_router
+from api.organizer import router as organizer_router
+from api.pdf import router as pdf_router
 from core.logic import generate_rounds
 from pydantic import BaseModel
 from middleware import setup_middlewares
@@ -26,6 +28,8 @@ setup_middlewares(app)
 app.include_router(generate_router, prefix="/api", tags=["api"])
 app.include_router(participant_router, prefix="/api", tags=["participants"])
 app.include_router(auth_router, prefix="/api", tags=["auth"])
+app.include_router(organizer_router, prefix="/api", tags=["organizer"])
+app.include_router(pdf_router, prefix="/api", tags=["pdf"])
 
 @app.get("/", tags=["health"])
 def root(db: Session = Depends(get_db)):

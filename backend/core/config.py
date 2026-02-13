@@ -28,4 +28,16 @@ class Settings:
         "prenom,nom,entreprise,email"
     ).split(",")
 
+    # Email SMTP pour les demandes organisateur
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USERNAME: str = os.getenv("SMTP_USERNAME", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+    SMTP_FROM: str = os.getenv("SMTP_FROM", "")
+    ORGANIZER_REQUEST_RECIPIENT: str = os.getenv(
+        "ORGANIZER_REQUEST_RECIPIENT",
+        "brewen@wsf.fr"
+    )
+
 settings = Settings()

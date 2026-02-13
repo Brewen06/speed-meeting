@@ -3,6 +3,19 @@ from sqlalchemy.orm import relationship
 from .database import Base
 import datetime
 
+class OrganizerRequest(Base):
+    __tablename__ = "organizer_requests"
+    id = Column(Integer, primary_key=True, index=True)
+    nom = Column(String)
+    prenom = Column(String)
+    email = Column(String)
+    telephone = Column(String)
+    activite = Column(String)
+    entreprise = Column(String)
+    raison = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    status = Column(String, default="pending")  # pending, approved, rejected
+
 class Participant(Base):
     __tablename__ = "participants"  
     id = Column(Integer, primary_key=True, index=True)

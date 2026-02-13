@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { AdminProtected } from "@/lib/protected-routes";
+import { API_BASE_URL } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +23,10 @@ interface SessionResults {
     total_rounds: number;
     participants_per_table: number;
     time_per_round_minutes?: number;
+    plan_version?: "free" | "paid";
+    event_company?: string | null;
+    event_location?: string | null;
+    event_date?: string | null;
   };
   rounds: RoundData[];
   message: string;
@@ -34,6 +38,50 @@ function AnalyseContent() {
   const [error, setError] = useState("");
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [isEndingSession, setIsEndingSession] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!sessionResults?.session_id) {
+      alert("Erreur: Pas de session_id disponible");
+      return;
+    }
+
+    const planVersion = sessionResults.metadata?.plan_version ?? "paid";
+    const params = new URLSearchParams();
+    if (sessionResults.metadata?.event_company) {
+      params.set("company", sessionResults.metadata.event_company);
+    }
+    if (sessionResults.metadata?.event_location) {
+      params.set("location", sessionResults.metadata.event_location);
+    }
+    if (sessionResults.metadata?.event_date) {
+      params.set("date", sessionResults.metadata.event_date);
+    }
+
+    setIsDownloadingPdf(true);
+    try {
+      const url = `${API_BASE_URL}/api/sessions/${sessionResults.session_id}/pdf/${planVersion}?${params.toString()}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Téléchargement impossible");
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `plan-rotation-${planVersion}-${sessionResults.session_id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      alert(`Erreur: ${errorMessage}`);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const handleEndSession = async () => {
     if (!sessionResults?.session_id) {
@@ -150,6 +198,13 @@ function AnalyseContent() {
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
                 >
                   Tableau de bord
+                </button>
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf}
+                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isDownloadingPdf ? "Téléchargement..." : "Télécharger le plan PDF"}
                 </button>
                 <button
                   onClick={() => router.push("/interface-admin/parametrage")}
