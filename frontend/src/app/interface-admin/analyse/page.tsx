@@ -36,7 +36,10 @@ function AnalyseContent() {
   const [isEndingSession, setIsEndingSession] = useState(false);
 
   const handleEndSession = async () => {
-    if (!sessionResults?.session_id) return;
+    if (!sessionResults?.session_id) {
+      alert("Erreur: Pas de session_id disponible");
+      return;
+    }
 
     const confirmed = window.confirm(
       "Êtes-vous sûr de vouloir terminer cette session ? Cette action est irréversible."
@@ -47,16 +50,19 @@ function AnalyseContent() {
     setIsEndingSession(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/generate/end-session/${sessionResults.session_id}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const url = `http://localhost:8000/api/end-session/${sessionResults.session_id}`;
+      console.log("Tentative d'appel à:", url);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+      console.log("Réponse du serveur:", response.status, data);
 
       if (!response.ok) {
-        throw new Error("Échec de la terminaison de la session");
+        throw new Error(`Erreur ${response.status}: ${data.detail || "Échec de la terminaison"}`);
       }
 
       // Nettoyer le localStorage
@@ -66,8 +72,9 @@ function AnalyseContent() {
       alert("Session terminée avec succès !");
       router.push("/interface-admin");
     } catch (err) {
-      alert("Erreur lors de la terminaison de la session. Veuillez réessayer.");
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      alert(`Erreur: ${errorMessage}`);
+      console.error("Erreur complète:", err);
     } finally {
       setIsEndingSession(false);
     }

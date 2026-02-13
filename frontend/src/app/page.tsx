@@ -10,7 +10,7 @@ export default function Home() {
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <Image
           className="dark:invert"
-          src="/LIF.jpg"
+          src="/LIF-bleu.jpg"
           alt="LIF logo"
           width={100}
           height={100}
@@ -21,16 +21,16 @@ export default function Home() {
             Speed Meeting
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 text-justify">
-            <b>Contexte</b>: Dans le cadre d'un déjeuner d'affaires organisé par les Forces Françaises de l'Industrie (<b>FFI</b>), des professionnels de secteurs divers et variés se réunissent pour échanger et développer leur réseau et partager la richesse de leurs parcours. Cet événement favorise des rencontres qualitatives, propices à la découverte d’expertises, d’expériences et d’opportunités de collaboration.
+            <b>Contexte</b> : Dans le cadre d'un déjeuner d'affaires organisé par les Forces Françaises de l'Industrie (<b>FFI</b>), des professionnels de secteurs divers et variés se réunissent pour échanger et développer leur réseau et partager la richesse de leurs parcours. Cet événement favorise des rencontres qualitatives, propices à la découverte d’expertises, d’expériences et d’opportunités de collaboration.
             <br />
             <br />
-            <b>Objectif</b>: Encourager la création de relations professionnelles durables en facilitant des échanges ciblés autour des parcours, des activités et des perspectives de projets communs. Chaque interaction vise à susciter des synergies, nourrir la réflexion stratégique et ouvrir de nouvelles perspectives d’affaires.
+            <b>Objectif</b> : Encourager la création de relations professionnelles durables en facilitant des échanges ciblés autour des parcours, des activités et des perspectives de projets communs. Chaque interaction vise à susciter des synergies, nourrir la réflexion stratégique et ouvrir de nouvelles perspectives d’affaires.
             <br />
             <br />
             <b>L'intelligence artificielle</b> orchestre la disposition des participants afin d’optimiser la diversité des rencontres. Les invités sont répartis de manière aléatoire à chaque table et changent de place à l’issue de chaque session de speed meeting, garantissant ainsi des échanges dynamiques et renouvelés.
             <br />
             <br />
-            <b className="text-red-500">Attention</b>: Afin de préserver la qualité et la variété des interactions, les participants ne rencontrent jamais deux fois la même personne. Il n’est donc pas requis que l’ensemble des invités se rencontre, l’accent étant mis sur la pertinence et la richesse des échanges.
+            <b className="text-red-500">Attention</b> : Afin de préserver la qualité et la variété des interactions, les participants ne rencontrent jamais deux fois la même personne. Il n’est donc pas requis que l’ensemble des invités se rencontre, l’accent étant mis sur la pertinence et la richesse des échanges.
           </p>
         </div>
         <ClientOnly />
