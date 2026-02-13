@@ -93,7 +93,7 @@ export default function AdminConnexion() {
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <label className="block text-sm font-semibold text-slate-700">
-                Nom d'utilisateur
+                Identifiant d'administrateur *
                 <input
                   type="text"
                   value={username}
@@ -105,7 +105,7 @@ export default function AdminConnexion() {
               </label>
 
               <label className="block text-sm font-semibold text-slate-700">
-                Mot de passe
+                Mot de passe *
                 <input
                   type="password"
                   value={password}

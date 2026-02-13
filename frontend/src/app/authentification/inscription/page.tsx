@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
 
 export default function Inscription() {
+  const router = useRouter();
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
@@ -11,13 +13,11 @@ export default function Inscription() {
   const [profession, setProfession] = useState("");
   const [entreprise, setEntreprise] = useState("");
   const [error, setError] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
-    setIsSuccess(false);
     setIsLoading(true);
 
     try {
@@ -44,14 +44,32 @@ export default function Inscription() {
         return;
       }
 
-      setIsSuccess(true);
-      setPrenom("");
-      setNom("");
-      setEmail("");
-      setTelephone("");
-      setProfession("");
-      setEntreprise("");
-      setIsLoading(false);
+      // Login automatique après inscription réussie
+      const loginResponse = await fetch(`${API_BASE_URL}/api/participants/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prenom: prenom.trim(),
+          nom: nom.trim(),
+          email: email.trim(),
+        }),
+      });
+
+      const loginPayload = await loginResponse.json();
+      if (!loginResponse.ok) {
+        setError("Inscription réussie mais connexion impossible. Veuillez vous connecter manuellement.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Stocker les données de session
+      localStorage.setItem("token", loginPayload.token);
+      localStorage.setItem("participant", JSON.stringify(loginPayload.participant));
+
+      // Rediriger vers l'interface invité
+      router.push("/interface-invite");
     } catch {
       setError("Erreur reseau. Veuillez reessayer.");
       setIsLoading(false);
@@ -84,7 +102,7 @@ export default function Inscription() {
                   type="text"
                   value={prenom}
                   onChange={(event) => setPrenom(event.target.value)}
-                  placeholder="Ex: Ines"
+                  placeholder="prénom"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#facc15] focus:outline-none focus:ring-2 focus:ring-[#facc15]/40"
                   required
                 />
@@ -96,7 +114,7 @@ export default function Inscription() {
                   type="text"
                   value={nom}
                   onChange={(event) => setNom(event.target.value.toUpperCase())}
-                  placeholder="Ex: MARTIN"
+                  placeholder="nom de famille"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#facc15] focus:outline-none focus:ring-2 focus:ring-[#facc15]/40"
                   required
                 />
@@ -108,7 +126,7 @@ export default function Inscription() {
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  placeholder="prenom.nom@email.com"
+                  placeholder="utilisateur@email.com"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
                   required
                 />
@@ -118,9 +136,13 @@ export default function Inscription() {
                 Téléphone (optionnel)
                 <input
                   type="tel"
+                  inputMode="numeric"
                   value={telephone}
-                  onChange={(event) => setTelephone(event.target.value)}
-                  placeholder="Ex: +33 6 12 34 56 78"
+                  onChange={(event) => {
+                    const filtered = event.target.value.replace(/[^0-9\s\-\+\(\)]/g, '');
+                    setTelephone(filtered);
+                  }}
+                  placeholder="Ex: +33 0 00 00 00 00"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
                 />
               </label>
@@ -131,7 +153,7 @@ export default function Inscription() {
                   type="text"
                   value={profession}
                   onChange={(event) => setProfession(event.target.value)}
-                  placeholder="Ex: Directeur Commercial"
+                  placeholder="profession"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
                 />
               </label>
@@ -142,7 +164,7 @@ export default function Inscription() {
                   type="text"
                   value={entreprise}
                   onChange={(event) => setEntreprise(event.target.value)}
-                  placeholder="Ex: Acme Corp"
+                  placeholder="entreprise"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
                 />
               </label>
@@ -150,12 +172,6 @@ export default function Inscription() {
               {error ? (
                 <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                   {error}
-                </p>
-              ) : null}
-
-              {isSuccess ? (
-                <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                  Inscription reussie. Vous pouvez maintenant vous connecter.
                 </p>
               ) : null}
 
