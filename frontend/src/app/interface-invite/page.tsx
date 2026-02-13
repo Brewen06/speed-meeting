@@ -14,7 +14,7 @@ function ParticipantContent() {
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Bienvenue sur votre espace participant.
             <br />
-            Retrouvez ici toutes les informations relatives à votre participation aux sessions de speed meeting. Consultez vos assignations de tables et découvrez avec qui vous allez échanger lors de chaque rotation. Profitez pleinement de ces moments de rencontre pour développer votre réseau professionnel.
+            Retrouvez ici toutes les tables à votre participation aux rotations de speed meeting. Consultez vos assignations de tables. <br></br>Profitez pleinement de ces moments de rencontre pour développer votre réseau professionnel.
           </p>
           <div className="flex flex-col gap-3 mt-6">
             <a href="/interface-invite/mes-tables" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">

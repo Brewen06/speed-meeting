@@ -8,6 +8,11 @@ export default function Foot() {
                             © 2026 - Tous droits réservés
                         </p>
                     </div>
+                    <div className="flex gap-4">
+                        <a href="/mentions-legales" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">
+                            Mentions légales
+                        </a>
+                    </div>
                 </div>
             </div>
         </footer>

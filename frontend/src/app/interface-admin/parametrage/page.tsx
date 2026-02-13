@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 function ParametrageContent() {
   const router = useRouter();
   const [tableCountLabel, setTableCountLabel] = useState("");
-  const [numberOfRounds, setNumberOfRounds] = useState("1");
+  const [numberOfRounds, setNumberOfRounds] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -199,7 +199,7 @@ function ParametrageContent() {
             Paramètrages de la session
           </h1>
           <p className="text-base text-zinc-600 dark:text-zinc-400 mb-8">
-            Renseignez ici les paramètres de la session afin de permettre à l’intelligence artificielle de déterminer avec précision le nombre de participants à répartir à chaque table lors d’un tour.
+            Configurez ici les paramètres de la session afin de permettre à l’intelligence artificielle de déterminer avec précision le nombre de participants à répartir à chaque table lors d’un tour.
           </p>
 
           {error && (
@@ -358,7 +358,6 @@ function ParametrageContent() {
                 placeholder="Ex: 5"
                 value={numberOfRounds}
                 onChange={(e) => setNumberOfRounds(e.target.value)}
-                min="1"
               />
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                 Nombre de fois que les participants changeront de table.
