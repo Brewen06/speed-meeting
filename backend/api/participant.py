@@ -67,6 +67,46 @@ async def upload_participants(
             col_email = field_to_index.get("email")
             col_profession = field_to_index.get("profession")
             col_entreprise = field_to_index.get("entreprise")
+            
+            # Détection intelligente de la colonne email par recherche de "@"
+            # Cette détection a PRIORITE sur l'ordre du config
+            detected_email_col = None
+            if len(df.columns) > 0:
+                for idx, col in enumerate(df.columns):
+                    sample_values = df[col].astype(str).unique()[:5]
+                    if any("@" in str(val) for val in sample_values if str(val) != "nan"):
+                        detected_email_col = idx
+                        break
+            
+            if detected_email_col is not None:
+                col_email = detected_email_col
+                
+                # Une fois l'email détecté, on réassigne intelligemment les autres colonnes
+                # Chercher prénom et nom aux deux premières colonnes (avant l'email généralement)
+                if detected_email_col >= 2:
+                    col_prenom = 0
+                    col_nom = 1
+                    
+                    # Les colonnes restantes sont entre le nom (col 1) et l'email (detected_email_col)
+                    remaining_cols = list(range(2, detected_email_col))
+                    
+                    # D'abord: chercher le TELEPHONE qui doit contenir des numéros
+                    for col_idx in remaining_cols[:]:  # faire une copie pour parcours sûr
+                        sample_values = df.iloc[:5, col_idx].astype(str).values
+                        # Vérifier si la colonne contient des numéros
+                        if any(any(c.isdigit() for c in str(val)) for val in sample_values if str(val) != 'nan'):
+                            col_telephone = col_idx
+                            remaining_cols.remove(col_idx)
+                            break
+                    
+                    # Les colonnes restantes: profession et entreprise
+                    if len(remaining_cols) > 0:
+                        # Première colonne restante = profession
+                        col_profession = remaining_cols[0]
+                    
+                    if len(remaining_cols) > 1:
+                        # Deuxième colonne restante = entreprise
+                        col_entreprise = remaining_cols[1]
         else:
             col_nom = get_column("nom", "Nom", "NOM", "last name", "Last name", "Last Name", "lastname", "Lastname", "LASTNAME", "LAST NAME", "nom de famille", "Nom de famille", "Nom de Famille", "Nom De Famille", "NOM DE FAMILLE")
             col_prenom = get_column("prénom", "prenom", "Prénom", "Prenom", "PRENOM", "PRÉNOM", "first name", "First name", "First Name", "firstname", "Firstname", "FIRSTNAME", "FIRST NAME")
@@ -89,7 +129,7 @@ async def upload_participants(
 
         is_indexed = not has_known_headers
         for _, row in df.iterrows():
-            nom = get_value(row, col_nom, is_index=is_indexed) or ""
+            nom = (get_value(row, col_nom, is_index=is_indexed) or "").upper()
             prenom = get_value(row, col_prenom, is_index=is_indexed) or ""
             nom_complet = get_value(row, col_nom_complet, is_index=is_indexed) or ""
             telephone = get_value(row, col_telephone, is_index=is_indexed)
@@ -99,6 +139,14 @@ async def upload_participants(
             
             if not nom_complet:
                 nom_complet = " ".join(part for part in [prenom, nom] if part).strip()
+            else:
+                # Si nom_complet est fourni, mettre le dernier mot en majuscules
+                parts = nom_complet.split()
+                if len(parts) > 1:
+                    parts[-1] = parts[-1].upper()
+                    nom_complet = " ".join(parts)
+                else:
+                    nom_complet = nom_complet.upper()
 
             if not nom_complet:
                 continue
@@ -132,7 +180,7 @@ async def upload_participants(
             if existing:
                 # Mettre à jour les informations du participant existant
                 if row["nom"]:
-                    existing.nom = row["nom"]
+                    existing.nom = row["nom"].upper()
                 if row["prenom"]:
                     existing.prenom = row["prenom"]
                 if row["nom_complet"]:
@@ -282,7 +330,7 @@ def search_participants(q: str = "", db: Session = Depends(get_db)):
 
 @router.post("/participants/add")
 def add_participant(participant: ParticipantCreate, db: Session = Depends(get_db)):
-    nom = (participant.nom or "").strip()
+    nom = (participant.nom or "").strip().upper()
     prenom = (participant.prenom or "").strip()
     nom_complet = (participant.nom_complet or "").strip()
     telephone = (participant.telephone or "").strip() or None
@@ -343,6 +391,17 @@ def update_participant(
         nom_complet = payload.nom_complet.strip()
         if not nom_complet:
             raise HTTPException(status_code=400, detail="Nom Complet requis")
+        
+        # Extraire le nom de famille (dernier mot) et le mettre en majuscule
+        parts = nom_complet.split()
+        if len(parts) > 1:
+            # Mettre le dernier mot (nom de famille) en majuscule
+            parts[-1] = parts[-1].upper()
+            nom_complet = " ".join(parts)
+        else:
+            # Si c'est un seul mot, le mettre en majuscule
+            nom_complet = nom_complet.upper()
+        
         participant.nom_complet = nom_complet
 
     if payload.email is not None:

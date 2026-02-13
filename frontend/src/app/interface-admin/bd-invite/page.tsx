@@ -725,12 +725,13 @@ function ParticipantsContent() {
                             <div className="px-6 py-5 space-y-4" onClick={(event) => event.stopPropagation()} role="presentation">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-black dark:text-white">
-                                        Nom complet
+                                        Nom complet <span className="text-xs text-zinc-500 dark:text-zinc-400">(nom de famille en majuscule)</span>
                                     </label>
                                     <input
                                         type="text"
                                         value={editNomComplet}
                                         onChange={(e) => setEditNomComplet(e.target.value)}
+                                        placeholder="Ex: Jean MARTIN"
                                         className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
                                     />
                                 </div>
@@ -853,12 +854,12 @@ function ParticipantsContent() {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-black dark:text-white">
-                                            Nom *
+                                            Nom * <span className="text-xs text-zinc-500 dark:text-zinc-400">(majuscule auto)</span>
                                         </label>
                                         <input
                                             type="text"
                                             value={addNom}
-                                            onChange={(e) => setAddNom(e.target.value)}
+                                            onChange={(e) => setAddNom(e.target.value.toUpperCase())}
                                             className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white"
                                         />
                                     </div>

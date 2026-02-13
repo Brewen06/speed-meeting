@@ -25,7 +25,7 @@ class Settings:
     # Import participants (ordre par defaut si pas d'en-tetes)
     DEFAULT_IMPORT_COLUMN_ORDER: list = os.getenv(
         "IMPORT_COLUMN_ORDER",
-        "prenom,nom,nom_complet,telephone,entreprise,profession,email"
+        "prenom,nom,entreprise,email"
     ).split(",")
 
 settings = Settings()

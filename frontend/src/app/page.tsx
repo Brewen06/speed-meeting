@@ -18,17 +18,16 @@ export default function Home() {
         />
         <div className="flex flex-col items-center gap-6 sm:items-start ">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50 text-center">
-            Speed Meeting
+            Speed Meeting Business
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400 text-justify">
-            <b>Contexte</b> : Dans le cadre d'un déjeuner d'affaires organisé par les Forces Françaises de l'Industrie (<b>FFI</b>), des professionnels de secteurs divers et variés se réunissent pour échanger et développer leur réseau et partager la richesse de leurs parcours. Cet événement favorise des rencontres qualitatives, propices à la découverte d’expertises, d’expériences et d’opportunités de collaboration.
+            <b>Contexte</b> : Ceci est un outil de génération de rotation organisé pour un speed meeting business. La FFI (Forces Françaises de l'Industrie) est une société d'événementiel qui organise des repas dans des clubs. Lors de ces repas, les participants sont invités à échanger autour de tables pendant des sessions de speed meeting. 
             <br />
             <br />
-            <b>L'objectif</b> : serait de 
             <b>L'intelligence artificielle</b> orchestre la disposition des participants afin d’optimiser la diversité des rencontres. Les invités sont répartis de manière aléatoire à chaque table et changent de place à l’issue de chaque session de speed meeting, garantissant ainsi des échanges dynamiques et renouvelés.
             <br />
             <br />
-            <b className="text-red-500">Attention</b> : Afin de préserver la qualité et la variété des interactions, les participants ne rencontrent jamais deux fois la même personne. Il n’est donc pas requis que l’ensemble des invités se rencontre, l’accent étant mis sur la pertinence et la richesse des échanges.
+            <b>Remarque</b> : Ce n'est pas obligatoire que tous les participants se rencontrent.
           </p>
         </div>
         <ClientOnly />
