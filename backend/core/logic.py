@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, time_per_round, seed=None):
+def generate_rounds(participants_input, tableCountLabel, numberOfRounds, seed=None):
     """Génère les rounds de speed meeting avec placement optimisé des participants"""
     
     # Configuration du seed pour reproductibilité (utile pour les tests)
@@ -19,7 +19,7 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
         participant_count = int(participants_input)
         participants_reels = [f"Participant {i+1}" for i in range(participant_count)]
     
-    logger.info(f"🎯 Génération de rounds : {participant_count} participants, {tableCountLabel} tables, {sessionDurationLabel}min")
+    logger.info(f"🎯 Génération de rounds : {participant_count} participants, {tableCountLabel} tables, {numberOfRounds} rotations")
     
     # Validations des paramètres
     if tableCountLabel <= 0:
@@ -31,8 +31,8 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
     if tableCountLabel > participant_count:
         return {"error": f"Nombre de tables ({tableCountLabel}) supérieur au nombre de participants ({participant_count})"}
     
-    if time_per_round > 0 and sessionDurationLabel < time_per_round:
-        return {"error": f"Durée de session ({sessionDurationLabel}min) inférieure au temps par round ({time_per_round}min)"}
+    if numberOfRounds <= 0:
+        return {"error": "Nombre de rotations doit être > 0"}
 
     # Ne plus utiliser de participants fantômes, travailler directement avec les vrais participants
     participants = participants_reels
@@ -44,19 +44,8 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
     # La capacité max est base_capacity + 1 si nécessaire
     max_capacity = base_capacity + (1 if tables_with_extra > 0 else 0)
 
-    #Calcul des limites basé sur les vrais participants
-    new_meetings_per_round = max_capacity - 1
-    max_theoretical_rounds = (participant_count - 1) // new_meetings_per_round if new_meetings_per_round > 0 else 1
-    
-    
-    if time_per_round > 0:
-        effective_time_per_round = time_per_round
-        max_rounds_by_time = sessionDurationLabel // effective_time_per_round
-    else:
-        max_rounds_by_time = min(max_theoretical_rounds, max(1, sessionDurationLabel // 10))
-        effective_time_per_round = sessionDurationLabel // max_rounds_by_time if max_rounds_by_time > 0 else sessionDurationLabel
-    
-    num_rounds = max(1, min(max_rounds_by_time, max_theoretical_rounds))
+    # Utiliser directement numberOfRounds sans calcul
+    num_rounds = numberOfRounds
 
     history = {p: set() for p in participants}
     last_table = {p: None for p in participants}  # Tracker la dernière table de chaque participant
@@ -157,7 +146,6 @@ def generate_rounds(participants_input, tableCountLabel, sessionDurationLabel, t
             "total_rounds": len(all_rounds),
             "participants_per_table": base_capacity,
             "tables": tableCountLabel,
-            "time_per_round_minutes": effective_time_per_round,
             "rounds_generated": len(all_rounds)
         },
         "rounds": all_rounds

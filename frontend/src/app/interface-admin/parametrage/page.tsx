@@ -9,8 +9,7 @@ import { useRouter } from "next/navigation";
 function ParametrageContent() {
   const router = useRouter();
   const [tableCountLabel, setTableCountLabel] = useState("");
-  const [sessionDurationLabel, setSessionDurationLabel] = useState("");
-  const [timePerRound, setTimePerRound] = useState("10");
+  const [numberOfRounds, setNumberOfRounds] = useState("1");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -165,8 +164,7 @@ function ParametrageContent() {
         },
         body: JSON.stringify({
           tableCountLabel: parseInt(tableCountLabel),
-          sessionDurationLabel: parseInt(sessionDurationLabel),
-          time_per_round: parseInt(timePerRound) || 0,
+          numberOfRounds: parseInt(numberOfRounds) || 1,
         }),
       });
 
@@ -349,37 +347,21 @@ function ParametrageContent() {
             </div>
 
             <div className="flex flex-col">
-              <label htmlFor="sessionDurationLabel" className="text-sm font-semibold text-black dark:text-white mb-2" >
-                Durée de la session (en minutes)
+              <label htmlFor="numberOfRounds" className="text-sm font-semibold text-black dark:text-white mb-2" >
+                Nombre de rotations
               </label>
               <input
-                id="sessionDurationLabel"
+                id="numberOfRounds"
                 type="number"
                 className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 required
-                placeholder="Ex: 60"
-                value={sessionDurationLabel}
-                onChange={(e) => setSessionDurationLabel(e.target.value)}
-                min="1"
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="timePerRound" className="text-sm font-semibold text-black dark:text-white mb-2" >
-                Temps par rotation (en minutes)
-              </label>
-              <input
-                id="timePerRound"
-                type="number"
-                className="w-full px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-black dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                required
-                placeholder="Ex: 10"
-                value={timePerRound}
-                onChange={(e) => setTimePerRound(e.target.value)}
+                placeholder="Ex: 5"
+                value={numberOfRounds}
+                onChange={(e) => setNumberOfRounds(e.target.value)}
                 min="1"
               />
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                Durée de chaque rotation avant que les participants ne changent de table.
+                Nombre de fois que les participants changeront de table.
               </p>
             </div>
 
@@ -395,8 +377,7 @@ function ParametrageContent() {
                 type="button"
                 onClick={() => {
                   setTableCountLabel("");
-                  setSessionDurationLabel("");
-                  setTimePerRound("10");
+                  setNumberOfRounds("1");
                   setError("");
                   setSelectedFile(null);
                   setUploadSuccess(false);

@@ -24,9 +24,7 @@ export default function Home() {
             <b>Contexte</b> : Dans le cadre d'un déjeuner d'affaires organisé par les Forces Françaises de l'Industrie (<b>FFI</b>), des professionnels de secteurs divers et variés se réunissent pour échanger et développer leur réseau et partager la richesse de leurs parcours. Cet événement favorise des rencontres qualitatives, propices à la découverte d’expertises, d’expériences et d’opportunités de collaboration.
             <br />
             <br />
-            <b>Objectif</b> : Encourager la création de relations professionnelles durables en facilitant des échanges ciblés autour des parcours, des activités et des perspectives de projets communs. Chaque interaction vise à susciter des synergies, nourrir la réflexion stratégique et ouvrir de nouvelles perspectives d’affaires.
-            <br />
-            <br />
+            <b>L'objectif</b> : serait de 
             <b>L'intelligence artificielle</b> orchestre la disposition des participants afin d’optimiser la diversité des rencontres. Les invités sont répartis de manière aléatoire à chaque table et changent de place à l’issue de chaque session de speed meeting, garantissant ainsi des échanges dynamiques et renouvelés.
             <br />
             <br />

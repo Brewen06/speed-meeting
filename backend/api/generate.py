@@ -10,8 +10,7 @@ router = APIRouter()
 
 class SessionConfig(BaseModel):
     tableCountLabel: int
-    sessionDurationLabel: int
-    time_per_round: int = 0
+    numberOfRounds: int
 
 @router.post("/generate")
 def create_session(config: SessionConfig, db: Session = Depends(get_db)):
@@ -27,13 +26,12 @@ def create_session(config: SessionConfig, db: Session = Depends(get_db)):
     result = generate_rounds(
         participant_names,
         tableCountLabel=config.tableCountLabel,
-        sessionDurationLabel=config.sessionDurationLabel,
-        time_per_round=config.time_per_round
+        numberOfRounds=config.numberOfRounds
     )
     
     # Créer une nouvelle session dans la base de données avec les rounds_data
     new_session = MeetingSession(
-        total_duration_minutes=config.sessionDurationLabel,
+        number_of_rounds=config.numberOfRounds,
         number_of_tables=config.tableCountLabel,
         rounds_data=result.get("rounds", []),
         created_at=datetime.datetime.utcnow()
