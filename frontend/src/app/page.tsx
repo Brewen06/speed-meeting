@@ -24,7 +24,7 @@ export default function Home() {
             <b>Contexte</b> : Ceci est un outil de génération de rotation organisé pour un speed meeting business. La FFI (Forces Françaises de l'Industrie) est une société d'événementiel qui organise des repas dans des clubs. Lors de ces repas, les participants sont invités à échanger autour de tables pendant des sessions de speed meeting. 
             <br />
             <br />
-            <b>L'intelligence artificielle</b> orchestre la disposition des participants afin d’optimiser la diversité des rencontres. Les invités sont répartis de manière aléatoire à chaque table et changent de place à l’issue de chaque session de speed meeting, garantissant ainsi des échanges dynamiques et renouvelés.
+            <b>Objectif</b> : Générer en moins d'une minute, pour les organisateurs du speed meeting business, le plan d'attribution des rotations pour chacun des participants. Vous fournissez un fichier Excel, et l'IA s'occupe de tout.
             <br />
             <br />
             <b>Remarque</b> : Ce n'est pas obligatoire que tous les participants se rencontrent.

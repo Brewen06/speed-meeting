@@ -92,37 +92,38 @@ export default function Connexion() {
                         <form className="space-y-5" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 <label className="block text-sm font-semibold text-slate-700">
-                                    Nom
+                                    Nom * <span className="text-xs text-slate-500">(en majuscule)</span>
                                     <input
                                         type="text"
                                         value={nom}
-                                        onChange={(event) => setNom(event.target.value)}
-                                        placeholder="Ex: Dupont"
+                                        onChange={(event) => setNom(event.target.value.toUpperCase())}
+                                        placeholder="Ex: DUPONT"
                                         className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#ff8f6b] focus:outline-none focus:ring-2 focus:ring-[#ff8f6b]/40"
                                         required
                                     />
                                 </label>
 
                                 <label className="block text-sm font-semibold text-slate-700">
-                                    Prénom
+                                    Prénom *
                                     <input
                                         type="text"
                                         value={prenom}
                                         onChange={(event) => setPrenom(event.target.value)}
                                         placeholder="Ex: Clara"
                                         className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#4cc9a6] focus:outline-none focus:ring-2 focus:ring-[#4cc9a6]/40"
+                                        required
                                     />
                                 </label>
                             </div>
                             <label className="block text-sm font-semibold text-slate-700">
-                                Email
+                                Email *
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
                                     placeholder=""
                                     className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#4cc9a6] focus:outline-none focus:ring-2 focus:ring-[#4cc9a6]/40"
-
+                                    required
                                 />
                             </label>
 

@@ -4,8 +4,12 @@ import { useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
 
 export default function Inscription() {
-  const [nomComplet, setNomComplet] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [profession, setProfession] = useState("");
+  const [entreprise, setEntreprise] = useState("");
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,8 +27,13 @@ export default function Inscription() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nom_complet: nomComplet.trim(),
-          email: email.trim() || undefined,
+          prenom: prenom.trim(),
+          nom: nom.trim(),
+          nom_complet: "",
+          email: email.trim(),
+          telephone: telephone.trim() || undefined,
+          profession: profession.trim() || undefined,
+          entreprise: entreprise.trim() || undefined,
         }),
       });
 
@@ -36,8 +45,12 @@ export default function Inscription() {
       }
 
       setIsSuccess(true);
-      setNomComplet("");
+      setPrenom("");
+      setNom("");
       setEmail("");
+      setTelephone("");
+      setProfession("");
+      setEntreprise("");
       setIsLoading(false);
     } catch {
       setError("Erreur reseau. Veuillez reessayer.");
@@ -60,25 +73,37 @@ export default function Inscription() {
                 Inscription invite
               </h2>
               <p className="text-sm text-slate-500">
-                Indiquez votre nom complet et un email pour permettre la recherche.
+                Indiquez vos informations pour vous inscrire à la session.
               </p>
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <label className="block text-sm font-semibold text-slate-700">
-                Nom complet
+                Prénom *
                 <input
                   type="text"
-                  value={nomComplet}
-                  onChange={(event) => setNomComplet(event.target.value)}
-                  placeholder="Ex: Ines Martin"
+                  value={prenom}
+                  onChange={(event) => setPrenom(event.target.value)}
+                  placeholder="Ex: Ines"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#facc15] focus:outline-none focus:ring-2 focus:ring-[#facc15]/40"
                   required
                 />
               </label>
 
               <label className="block text-sm font-semibold text-slate-700">
-                Email
+                Nom * <span className="text-xs text-slate-500">(en majuscule)</span>
+                <input
+                  type="text"
+                  value={nom}
+                  onChange={(event) => setNom(event.target.value.toUpperCase())}
+                  placeholder="Ex: MARTIN"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#facc15] focus:outline-none focus:ring-2 focus:ring-[#facc15]/40"
+                  required
+                />
+              </label>
+
+              <label className="block text-sm font-semibold text-slate-700">
+                Email *
                 <input
                   type="email"
                   value={email}
@@ -86,6 +111,39 @@ export default function Inscription() {
                   placeholder="prenom.nom@email.com"
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
                   required
+                />
+              </label>
+
+              <label className="block text-sm font-semibold text-slate-700">
+                Téléphone (optionnel)
+                <input
+                  type="tel"
+                  value={telephone}
+                  onChange={(event) => setTelephone(event.target.value)}
+                  placeholder="Ex: +33 6 12 34 56 78"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
+                />
+              </label>
+
+              <label className="block text-sm font-semibold text-slate-700">
+                Profession (optionnel)
+                <input
+                  type="text"
+                  value={profession}
+                  onChange={(event) => setProfession(event.target.value)}
+                  placeholder="Ex: Directeur Commercial"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
+                />
+              </label>
+
+              <label className="block text-sm font-semibold text-slate-700">
+                Entreprise (optionnel)
+                <input
+                  type="text"
+                  value={entreprise}
+                  onChange={(event) => setEntreprise(event.target.value)}
+                  placeholder="Ex: Acme Corp"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-[#93c5fd] focus:outline-none focus:ring-2 focus:ring-[#93c5fd]/40"
                 />
               </label>
 
@@ -133,8 +191,8 @@ export default function Inscription() {
               Prenez votre place avant le debut de la session.
             </h1>
             <p className="max-w-xl text-base text-slate-600 md:text-lg">
-              L'organisateur utilisera votre nom complet pour vous placer a la
-              bonne table. Indiquez un email pour faciliter la verification.
+              L'organisateur utilisera vos informations pour vous placer à la
+              bonne table et vous identifier. Les champs optionnels permettent une meilleure organisation.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
