@@ -36,12 +36,12 @@ try:
     
     # Valider les changements
     db.commit()
-    print(f"✓ Migration réussie : {updated_count} participant(s) mis à jour")
+    print(f"Migration réussie : {updated_count} participant(s) mis à jour")
     print("Tous les noms de famille sont maintenant en majuscules")
     
 except Exception as e:
     db.rollback()
-    print(f"✗ Erreur lors de la migration : {str(e)}")
+    print(f"Erreur lors de la migration : {str(e)}")
     
 finally:
     db.close()

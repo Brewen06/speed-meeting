@@ -9,7 +9,7 @@ def generate_rounds(participants_input, tableCountLabel, numberOfRounds, seed=No
     # Configuration du seed pour reproductibilité (utile pour les tests)
     if seed is not None:
         random.seed(seed)
-        logger.debug(f"🎲 Seed défini : {seed}")
+        logger.debug(f"Seed défini : {seed}")
     
     # Gestionnaire des participants et des places vides
     if isinstance(participants_input, list):
@@ -33,8 +33,6 @@ def generate_rounds(participants_input, tableCountLabel, numberOfRounds, seed=No
     
     if numberOfRounds <= 0:
         return {"error": "Nombre de rotations doit être > 0"}
-
-    # Ne plus utiliser de participants fantômes, travailler directement avec les vrais participants
     participants = participants_reels
     
     # Calculer la capacité de base et le nombre de tables avec un participant supplémentaire
