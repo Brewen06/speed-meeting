@@ -1,1 +1,7 @@
-reportlab==4.2.2
+fastapi[standard]
+sqlalchemy
+pandas
+openpyxl
+reportlab
+email-validator
+python-multipart

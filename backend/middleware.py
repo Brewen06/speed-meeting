@@ -21,7 +21,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         
         # Log de la requête entrante
-        logger.info(f"🔵 Requête reçue: {request.method} {request.url.path}")
+        logger.info(f"Requête reçue: {request.method} {request.url.path}")
         
         try:
             response = await call_next(request)
@@ -29,7 +29,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             
             # Log de la réponse avec code de statut
             logger.info(
-                f"✅ Réponse: {request.method} {request.url.path} | "
+                f"Réponse: {request.method} {request.url.path} | "
                 f"Status: {response.status_code} | "
                 f"Temps: {process_time:.3f}s"
             )
@@ -41,7 +41,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             process_time = time.time() - start_time
             logger.error(
-                f"❌ Erreur: {request.method} {request.url.path} | "
+                f"Erreur: {request.method} {request.url.path} | "
                 f"Exception: {str(e)} | "
                 f"Temps: {process_time:.3f}s"
             )
@@ -106,4 +106,4 @@ def setup_middlewares(app):
     # Logging des requêtes
     app.add_middleware(RequestLoggingMiddleware)
     
-    logger.info("✨ Middlewares configurés avec succès")
+    logger.info("Middlewares configurés avec succès")

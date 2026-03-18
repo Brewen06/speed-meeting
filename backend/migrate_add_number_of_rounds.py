@@ -19,19 +19,19 @@ def migrate():
         if "number_of_rounds" not in columns:
             print("Ajout de la colonne 'number_of_rounds'...")
             cursor.execute("ALTER TABLE sessions ADD COLUMN number_of_rounds INTEGER DEFAULT 1")
-            print("✓ Colonne 'number_of_rounds' ajoutée")
+            print("Colonne 'number_of_rounds' ajoutée")
         else:
-            print("✓ La colonne 'number_of_rounds' existe déjà")
+            print("La colonne 'number_of_rounds' existe déjà")
         
         # Rendre total_duration_minutes nullable
         print("Mise à jour de la colonne 'total_duration_minutes' (nullable)...")
         # Note: SQLite ne supporte pas ALTER COLUMN directement, donc nous gardons juste la valeur nullable dans le modèle
         
         conn.commit()
-        print("\n✅ Migration réussie !")
+        print("\n Migration réussie !")
         
     except sqlite3.Error as e:
-        print(f"❌ Erreur lors de la migration: {e}")
+        print(f"Erreur lors de la migration: {e}")
         conn.rollback()
     finally:
         conn.close()
@@ -41,4 +41,4 @@ if __name__ == "__main__":
         print(f"Base de données trouvée: {DB_PATH}\n")
         migrate()
     else:
-        print(f"❌ Base de données non trouvée à {DB_PATH}")
+        print(f"Base de données non trouvée à {DB_PATH}")

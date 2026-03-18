@@ -19,26 +19,26 @@ def migrate():
         if "ended_at" not in columns:
             print("Ajout de la colonne 'ended_at'...")
             cursor.execute("ALTER TABLE sessions ADD COLUMN ended_at DATETIME")
-            print("✓ Colonne 'ended_at' ajoutée")
+            print("Colonne 'ended_at' ajoutée")
         else:
-            print("✓ La colonne 'ended_at' existe déjà")
+            print("La colonne 'ended_at' existe déjà")
         
         if "is_active" not in columns:
             print("Ajout de la colonne 'is_active'...")
             cursor.execute("ALTER TABLE sessions ADD COLUMN is_active BOOLEAN DEFAULT 1")
-            print("✓ Colonne 'is_active' ajoutée")
+            print("Colonne 'is_active' ajoutée")
             
             # Mettre à jour toutes les sessions existantes comme actives
             cursor.execute("UPDATE sessions SET is_active = 1 WHERE is_active IS NULL")
-            print("✓ Sessions existantes mises à jour")
+            print("Sessions existantes mises à jour")
         else:
-            print("✓ La colonne 'is_active' existe déjà")
+            print("La colonne 'is_active' existe déjà")
         
         conn.commit()
-        print("\n✅ Migration réussie !")
+        print("\n Migration réussie !")
         
     except sqlite3.Error as e:
-        print(f"❌ Erreur lors de la migration: {e}")
+        print(f"Erreur lors de la migration: {e}")
         conn.rollback()
     finally:
         conn.close()
@@ -48,5 +48,5 @@ if __name__ == "__main__":
         print(f"Base de données trouvée: {DB_PATH}\n")
         migrate()
     else:
-        print(f"❌ Base de données non trouvée: {DB_PATH}")
+        print(f"Base de données non trouvée: {DB_PATH}")
         print("La base de données sera créée automatiquement au premier lancement du serveur.")

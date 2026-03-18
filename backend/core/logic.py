@@ -19,7 +19,7 @@ def generate_rounds(participants_input, tableCountLabel, numberOfRounds, seed=No
         participant_count = int(participants_input)
         participants_reels = [f"Participant {i+1}" for i in range(participant_count)]
     
-    logger.info(f"🎯 Génération de rounds : {participant_count} participants, {tableCountLabel} tables, {numberOfRounds} rotations")
+    logger.info(f"Génération de rounds : {participant_count} participants, {tableCountLabel} tables, {numberOfRounds} rotations")
     
     # Validations des paramètres
     if tableCountLabel <= 0:
@@ -138,7 +138,7 @@ def generate_rounds(participants_input, tableCountLabel, numberOfRounds, seed=No
 
         all_rounds.append(round_data)
 
-    logger.info(f"✅ {len(all_rounds)} rounds générés avec succès | Participants: {participant_count}")
+    logger.info(f"{len(all_rounds)} rounds générés avec succès | Participants: {participant_count}")
     
     return {
         "metadata": {
