@@ -36,7 +36,7 @@ foreach ($required as $field) {
 }
 
 // Destinataire de l'email
-$to = 'brewen@wsf.fr';
+$to = 'brewen68@ik.me';
 $subject = "Demande organisateur - {$data['entreprise']}";
 
 // Corps de l'email
