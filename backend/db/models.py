@@ -14,7 +14,7 @@ class OrganizerRequest(Base):
     entreprise = Column(String)
     raison = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    status = Column(String, default="pending")  # pending, approved, rejected
+    status = Column(String, default="pending")  
 
 class Participant(Base):
     __tablename__ = "participants"  
