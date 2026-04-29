@@ -1,1 +1,0 @@
-& "$env:APPDATA\Python\Python313\Scripts\fastapi.exe" dev main.py --port 8001

@@ -37,7 +37,6 @@ class Settings:
     SMTP_FROM: str = os.getenv("SMTP_FROM", "")
     ORGANIZER_REQUEST_RECIPIENT: str = os.getenv(
         "ORGANIZER_REQUEST_RECIPIENT",
-        "brewen@wsf.fr"
     )
 
 settings = Settings()
