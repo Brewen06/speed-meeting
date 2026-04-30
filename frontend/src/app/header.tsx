@@ -79,12 +79,7 @@ export default function Header() {
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-between h-16 sm:h-20">
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-            <img
-              src="/LIF.jpg"
-              alt="Logo LIF"
-              className="h-12 sm:h-16 md:h-20 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-            />
-            <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-wider">
+                        <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-wider">
               Speed Meeting
             </h1>
           </div>

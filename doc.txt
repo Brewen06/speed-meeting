@@ -7,6 +7,15 @@ python.exe -m pip install --upgrade pip
 
 localhost
 & "$env:APPDATA\Python\Python313\Scripts\fastapi.exe" dev main.py --port 8001
+                    ou n'importe quelle version python ex Python314, etc...
+
+-----------------------------------------------------------------------------
+autre méthode :
+
+cd C:\Users\ordi2124253\Documents\speed-meeting\backend 
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m fastapi dev main.py --port 8000
 
 
 frontend
