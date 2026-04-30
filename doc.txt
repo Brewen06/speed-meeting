@@ -12,7 +12,7 @@ localhost
 -----------------------------------------------------------------------------
 autre méthode :
 
-cd C:\Users\ordi2124253\Documents\speed-meeting\backend 
+cd Documents\speed-meeting\backend 
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 python -m fastapi dev main.py --port 8000
